@@ -127,7 +127,7 @@
             this.Controls.Add(this.PathLabel);
             this.Controls.Add(this.PathTextBox);
             this.Name = "MainWindowBackend";
-            this.Text = "Form1";
+            this.Text = "Find In";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
