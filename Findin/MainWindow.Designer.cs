@@ -36,7 +36,7 @@
             this.SearchLabel = new System.Windows.Forms.Label();
             this.ResultsListBox = new System.Windows.Forms.ListBox();
             this.FileTypeLabel = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.FileTypeTextBox = new System.Windows.Forms.TextBox();
             this.SearchButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -106,12 +106,12 @@
             this.FileTypeLabel.TabIndex = 8;
             this.FileTypeLabel.Text = "In File Types (separated by \";\")";
             // 
-            // textBox1
+            // FileTypeTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(182, 99);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(606, 23);
-            this.textBox1.TabIndex = 3;
+            this.FileTypeTextBox.Location = new System.Drawing.Point(182, 99);
+            this.FileTypeTextBox.Name = "FileTypeTextBox";
+            this.FileTypeTextBox.Size = new System.Drawing.Size(606, 23);
+            this.FileTypeTextBox.TabIndex = 3;
             // 
             // SearchButton
             // 
@@ -129,7 +129,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.SearchButton);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.ResultsListBox);
             this.Controls.Add(this.SearchLabel);
@@ -155,7 +155,7 @@
         private Label SearchLabel;
         private ListBox ResultsListBox;
         private Label FileTypeLabel;
-        private TextBox textBox1;
+        private TextBox FileTypeTextBox;
         private Button SearchButton;
     }
 }
