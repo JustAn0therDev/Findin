@@ -37,14 +37,13 @@
             this.ResultsListBox = new System.Windows.Forms.ListBox();
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
-            this.SearchButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PathTextBox
             // 
             this.PathTextBox.Location = new System.Drawing.Point(157, 12);
             this.PathTextBox.Name = "PathTextBox";
-            this.PathTextBox.Size = new System.Drawing.Size(631, 23);
+            this.PathTextBox.Size = new System.Drawing.Size(1016, 23);
             this.PathTextBox.TabIndex = 0;
             // 
             // PathLabel
@@ -69,15 +68,16 @@
             // 
             this.RegExpTextBox.Location = new System.Drawing.Point(157, 70);
             this.RegExpTextBox.Name = "RegExpTextBox";
-            this.RegExpTextBox.Size = new System.Drawing.Size(631, 23);
+            this.RegExpTextBox.Size = new System.Drawing.Size(1016, 23);
             this.RegExpTextBox.TabIndex = 2;
             // 
             // SearchTextBox
             // 
             this.SearchTextBox.Location = new System.Drawing.Point(157, 41);
             this.SearchTextBox.Name = "SearchTextBox";
-            this.SearchTextBox.Size = new System.Drawing.Size(631, 23);
+            this.SearchTextBox.Size = new System.Drawing.Size(1016, 23);
             this.SearchTextBox.TabIndex = 1;
+            this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBoxTextChanged);
             // 
             // SearchLabel
             // 
@@ -92,9 +92,9 @@
             // 
             this.ResultsListBox.FormattingEnabled = true;
             this.ResultsListBox.ItemHeight = 15;
-            this.ResultsListBox.Location = new System.Drawing.Point(12, 175);
+            this.ResultsListBox.Location = new System.Drawing.Point(12, 130);
             this.ResultsListBox.Name = "ResultsListBox";
-            this.ResultsListBox.Size = new System.Drawing.Size(776, 259);
+            this.ResultsListBox.Size = new System.Drawing.Size(1161, 304);
             this.ResultsListBox.TabIndex = 4;
             // 
             // FileTypeLabel
@@ -110,25 +110,14 @@
             // 
             this.FileTypeTextBox.Location = new System.Drawing.Point(182, 99);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
-            this.FileTypeTextBox.Size = new System.Drawing.Size(606, 23);
+            this.FileTypeTextBox.Size = new System.Drawing.Size(991, 23);
             this.FileTypeTextBox.TabIndex = 3;
-            // 
-            // SearchButton
-            // 
-            this.SearchButton.Location = new System.Drawing.Point(471, 128);
-            this.SearchButton.Name = "SearchButton";
-            this.SearchButton.Size = new System.Drawing.Size(317, 41);
-            this.SearchButton.TabIndex = 9;
-            this.SearchButton.Text = "Search";
-            this.SearchButton.UseVisualStyleBackColor = true;
-            this.SearchButton.Click += new System.EventHandler(this.SearchButton_Click);
             // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.SearchButton);
+            this.ClientSize = new System.Drawing.Size(1185, 445);
             this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.ResultsListBox);
@@ -156,6 +145,5 @@
         private ListBox ResultsListBox;
         private Label FileTypeLabel;
         private TextBox FileTypeTextBox;
-        private Button SearchButton;
     }
 }

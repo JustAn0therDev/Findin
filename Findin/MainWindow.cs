@@ -1,3 +1,6 @@
+using System.Text.RegularExpressions;
+using System.Text;
+
 namespace Findin
 {
     public partial class MainWindowBackend : Form
@@ -7,9 +10,11 @@ namespace Findin
             InitializeComponent();
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
+        public void SearchTextBoxTextChanged(object sender, EventArgs e)
         {
             ResultsListBox.Items.Clear();
+
+            string fileTypes = CleanFileTypesString(FileTypeTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
             {
@@ -17,44 +22,72 @@ namespace Findin
                 return;
             }
 
-            if (!TextBoxHasValue(SearchTextBox))
-            {
-                ShowEmptyFieldAlert(SearchTextBox);
-                return;
-            }
+            if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes)) return;
 
             string path = PathTextBox.Text;
 
             string search = SearchTextBox.Text;
 
-            string fileTypes = FileTypeTextBox.Text;
-
             List<string> directories = new() { Directory.GetCurrentDirectory() };
 
             PopulateListOfSubDirectoriesInPath(directories, path);
 
-            // TODO: populate "files" with bitwise operators that result in a number, which is the key of a dictionary in the class:
-            /*
-                Dictionary<int, Func<string, string, List<string>>> { [1] = x, [2] = y, [4] = z }
-            */
-            // TODO: also check if a delegate can handle an arbitrary number of arguments
-
-            List<string> files;
+            List<string> fileNames;
 
             if (string.IsNullOrEmpty(fileTypes))
             {
-                files = GetAllFileNames(directories);
+                fileNames = GetAllFileNames(directories);
             }
             else
             {
-                files = GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
+                fileNames = GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
             }
 
-            foreach (var fileName in files)
+            foreach (var fileName in fileNames)
             {
-                if (fileName.Contains(search))
-                    ResultsListBox.Items.Add(fileName);
+                var sb = new StringBuilder(File.ReadAllText(fileName));
+
+                MatchCollection matches = Regex.Matches(sb.ToString(), search);
+
+                if (matches.Count > 0)
+                {
+                    foreach (Match match in matches)
+                        ResultsListBox.Items.Add($"{fileName}: \"{ReadWholeLine(sb.ToString(), match.Index)}\"");
+                }
             }
+        }
+
+        private static string ReadWholeLine(string input, int matchIndex)
+        {
+            StringBuilder result = new();
+            StringBuilder backwardResult = new();
+            StringBuilder forwardResult = new();
+            int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
+
+            // Going forward
+            while (forwardIndex < input.Length - 1)
+            {
+                if (input[forwardIndex] == '\r')
+                    break;
+
+                forwardResult.Append(input[forwardIndex]);
+                forwardIndex++;
+            }
+
+            // Going backwards
+            while (backwardIndex >= 0)
+            {
+                if (input[backwardIndex] == '\n')
+                    break;
+
+                backwardResult.Append(input[backwardIndex]);
+                backwardIndex--;
+            }
+
+            result.Append(string.Join("", backwardResult.ToString().Reverse()));
+            result.Append(forwardResult);
+
+            return result.ToString().Trim();
         }
 
         private static List<string> GetAllFileNames(List<string> directories)
@@ -80,6 +113,8 @@ namespace Findin
 
             return fileNames;
         }
+
+        private static string CleanFileTypesString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
         private static List<string> FilterFilesByFileTypes(string directory, IEnumerable<string> fileTypes)
         {
