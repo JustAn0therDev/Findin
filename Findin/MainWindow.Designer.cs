@@ -37,6 +37,7 @@
             this.ResultsListBox = new System.Windows.Forms.ListBox();
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.SearchButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -91,9 +92,9 @@
             // 
             this.ResultsListBox.FormattingEnabled = true;
             this.ResultsListBox.ItemHeight = 15;
-            this.ResultsListBox.Location = new System.Drawing.Point(12, 133);
+            this.ResultsListBox.Location = new System.Drawing.Point(12, 175);
             this.ResultsListBox.Name = "ResultsListBox";
-            this.ResultsListBox.Size = new System.Drawing.Size(776, 304);
+            this.ResultsListBox.Size = new System.Drawing.Size(776, 259);
             this.ResultsListBox.TabIndex = 4;
             // 
             // FileTypeLabel
@@ -112,11 +113,22 @@
             this.textBox1.Size = new System.Drawing.Size(606, 23);
             this.textBox1.TabIndex = 3;
             // 
+            // SearchButton
+            // 
+            this.SearchButton.Location = new System.Drawing.Point(471, 128);
+            this.SearchButton.Name = "SearchButton";
+            this.SearchButton.Size = new System.Drawing.Size(317, 41);
+            this.SearchButton.TabIndex = 9;
+            this.SearchButton.Text = "Search";
+            this.SearchButton.UseVisualStyleBackColor = true;
+            this.SearchButton.Click += new System.EventHandler(this.SearchButton_Click);
+            // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.ResultsListBox);
@@ -128,7 +140,6 @@
             this.Controls.Add(this.PathTextBox);
             this.Name = "MainWindowBackend";
             this.Text = "Find In";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -145,5 +156,6 @@
         private ListBox ResultsListBox;
         private Label FileTypeLabel;
         private TextBox textBox1;
+        private Button SearchButton;
     }
 }
