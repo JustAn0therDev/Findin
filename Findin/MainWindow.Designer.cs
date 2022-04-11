@@ -69,14 +69,14 @@
             this.RegExpTextBox.Location = new System.Drawing.Point(157, 70);
             this.RegExpTextBox.Name = "RegExpTextBox";
             this.RegExpTextBox.Size = new System.Drawing.Size(631, 23);
-            this.RegExpTextBox.TabIndex = 3;
+            this.RegExpTextBox.TabIndex = 2;
             // 
             // SearchTextBox
             // 
             this.SearchTextBox.Location = new System.Drawing.Point(157, 41);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(631, 23);
-            this.SearchTextBox.TabIndex = 4;
+            this.SearchTextBox.TabIndex = 1;
             // 
             // SearchLabel
             // 
@@ -94,7 +94,7 @@
             this.ResultsListBox.Location = new System.Drawing.Point(12, 133);
             this.ResultsListBox.Name = "ResultsListBox";
             this.ResultsListBox.Size = new System.Drawing.Size(776, 304);
-            this.ResultsListBox.TabIndex = 7;
+            this.ResultsListBox.TabIndex = 4;
             // 
             // FileTypeLabel
             // 
@@ -110,7 +110,7 @@
             this.textBox1.Location = new System.Drawing.Point(182, 99);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(606, 23);
-            this.textBox1.TabIndex = 9;
+            this.textBox1.TabIndex = 3;
             // 
             // MainWindowBackend
             // 
