@@ -11,7 +11,7 @@ Although the things listed above are not unique to any "file finder" or "find in
 
 The list below is a technical detail about how some features should be implemented:
 
-- Any kind of file search should be done using multiple threads and locking the files that are being searched in each thread. If a file was already searched, its path should be added to a list so its not searched again.
+- Any kind of file search should be done using multiple threads and locking the files that are being searched in each thread. If a file was already searched, its path should be added to a list so its not searched again. This is definetely doable, the only thing I can't do is include the file names in the ResultListBox if its on a thread that is not the main one.
 
 - Some information about the location of the content should be shown:
 	- Line number
@@ -21,8 +21,11 @@ The list below is a technical detail about how some features should be implement
 
 It is still in development but it should take long before its ready. Here is the "TODO List" of remaining tasks:
 
-- Search for files with specific extensions;
-- Search with regular expressions;
+- ~~Search for files with specific extensions~~;
+- ~~Search with regular expressions~~;
+- Remove regular expression field since the search is done with Regex from the get-go;
+- Re-think user experience;
+- Do not allow for search in binary files;
 - Allow for tabs with separate search states.
 
 The list is updated per feature implementation, change request or bug fix.
