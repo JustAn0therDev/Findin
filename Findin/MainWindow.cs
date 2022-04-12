@@ -1,19 +1,14 @@
-using System.Text.RegularExpressions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Findin
 {
     public partial class MainWindowBackend : Form
     {
-        public MainWindowBackend()
-        {
-            InitializeComponent();
-        }
+        public MainWindowBackend() => InitializeComponent();
 
-        public void SearchTextBoxTextChanged(object sender, EventArgs e)
+        public void Search(object sender, EventArgs e)
         {
-            ResultsListBox.Items.Clear();
-
             string fileTypes = CleanFileTypesString(FileTypeTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
@@ -25,41 +20,43 @@ namespace Findin
             if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes)) return;
 
             string path = PathTextBox.Text;
-
             string search = SearchTextBox.Text;
+
+            Task.Run(() => ShowResults(path, search, fileTypes));
+        }
+
+        private void ShowResults(string path, string search, string fileTypes)
+        {
+            ResultsListBox.Items.Clear();
 
             List<string> directories = new() { Directory.GetCurrentDirectory() };
 
             PopulateListOfSubDirectoriesInPath(directories, path);
 
-            List<string> fileNames;
+            List<string> fileNames = string.IsNullOrEmpty(fileTypes) ? GetAllFileNames(directories) : GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
 
-            if (string.IsNullOrEmpty(fileTypes))
-            {
-                fileNames = GetAllFileNames(directories);
-            }
-            else
-            {
-                fileNames = GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
-            }
+            List<string> results = new();
 
-            foreach (var fileName in fileNames)
-            {
-                var sb = new StringBuilder(File.ReadAllText(fileName));
+            string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $"(?i){search}" : search;
 
-                MatchCollection matches = Regex.Matches(sb.ToString(), search);
+            Parallel.ForEach(fileNames, fileName =>
+            {
+                StringBuilder sb = new(File.ReadAllText(fileName));
+
+                string fileContent = sb.ToString();
+
+                MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
                 if (matches.Count > 0)
-                {
                     foreach (Match match in matches)
-                        ResultsListBox.Items.Add($"{fileName}: \"{ReadWholeLine(sb.ToString(), match.Index)}\"");
-                }
-            }
+                        results.Add($"{fileName}: \"{ReadWholeLine(fileContent, match.Index)}\"");
+            });
+
+            foreach (var result in results) ResultsListBox.Items.Add(result);
         }
 
         private static string ReadWholeLine(string input, int matchIndex)
         {
-            StringBuilder result = new();
             StringBuilder backwardResult = new();
             StringBuilder forwardResult = new();
             int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
@@ -67,8 +64,11 @@ namespace Findin
             // Going forward
             while (forwardIndex < input.Length - 1)
             {
+                // TODO: make this better. Not every time the line breaks will be this consistent.
                 if (input[forwardIndex] == '\r')
+                {
                     break;
+                }
 
                 forwardResult.Append(input[forwardIndex]);
                 forwardIndex++;
@@ -77,17 +77,17 @@ namespace Findin
             // Going backwards
             while (backwardIndex >= 0)
             {
+                // TODO: make this better. Not every time the line breaks will be this consistent.
                 if (input[backwardIndex] == '\n')
+                {
                     break;
+                }
 
                 backwardResult.Append(input[backwardIndex]);
                 backwardIndex--;
             }
 
-            result.Append(string.Join("", backwardResult.ToString().Reverse()));
-            result.Append(forwardResult);
-
-            return result.ToString().Trim();
+            return (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim();
         }
 
         private static List<string> GetAllFileNames(List<string> directories)
@@ -106,34 +106,18 @@ namespace Findin
         {
             List<string> fileNames = new();
 
+            string[] fileTypeArray = fileTypes.Split(';');
+
             foreach (var directory in directories)
             {
-                fileNames.AddRange(FilterFilesByFileTypes(directory, fileTypes.Split(';')));
+                foreach (var fileType in fileTypeArray)
+                    fileNames.AddRange(Directory.GetFiles(directory, fileType));
             }
 
             return fileNames;
         }
 
         private static string CleanFileTypesString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
-
-        private static List<string> FilterFilesByFileTypes(string directory, IEnumerable<string> fileTypes)
-        {
-            List<string> filtered = new();
-            string[] filesInDirectory = Directory.GetFiles(directory);
-
-            foreach (var fileName in filesInDirectory)
-            {
-                foreach (var fileType in fileTypes)
-                {
-                    if (fileName.EndsWith(fileType))
-                    {
-                        filtered.Add(fileName);
-                    }
-                }
-            }
-
-            return filtered;
-        }
 
         private static void PopulateListOfSubDirectoriesInPath(List<string> subDirectoriesListToPopulate, string path)
         {

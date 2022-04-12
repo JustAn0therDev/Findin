@@ -17,7 +17,11 @@ The list below is a technical detail about how some features should be implement
 	- Line number
 	- Column number (index)
 
-- Change the "TextChanged" event in the text box for something else, this is related to the "Re-think user experience" task.
+- Fix line check consistency because not all line breaks will be the same for every editor and/or OS;
+
+- ~~Change the "TextChanged" event in the text box for something else, this is related to the "Re-think user experience" task.~~ -> This has been fixed by making the search and Regex match asynchronous;
+- Fix the response time or search timing so that the program feels much faster. Search timing could mean clicking on a "Search" button;
+- Make the debugging experience better, since Visual Studio 2022 can't keep up with the new .NET 6 thread operations.
 
 ## In Development
 
@@ -25,9 +29,12 @@ It is still in development but it should take long before its ready. Here is the
 
 - ~~Search for files with specific extensions~~;
 - ~~Search with regular expressions~~;
-- Remove regular expression field since the search is done with Regex from the get-go;
-- Re-think user experience;
-- Do not allow for search in binary files;
+- ~~Remove regular expression field since the search is done with Regex from the get-go~~;
+- ~~Re-think user experience~~;
+- ~~Do not allow for search in binary files~~;
+- Allow the user to locate a path by searching for it inside the program with a folder helper;
+- Save the last search in a file that is always updated by each search made (this makes the "Search" button even better);
+- _If a search button is really used, it should have a consistent tab index for a good navigation_;
 - Allow for tabs with separate search states.
 
 The list is updated per feature implementation, change request or bug fix.

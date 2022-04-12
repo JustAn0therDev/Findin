@@ -30,13 +30,12 @@
         {
             this.PathTextBox = new System.Windows.Forms.TextBox();
             this.PathLabel = new System.Windows.Forms.Label();
-            this.RegExpLabel = new System.Windows.Forms.Label();
-            this.RegExpTextBox = new System.Windows.Forms.TextBox();
             this.SearchTextBox = new System.Windows.Forms.TextBox();
             this.SearchLabel = new System.Windows.Forms.Label();
             this.ResultsListBox = new System.Windows.Forms.ListBox();
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
+            this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -55,34 +54,18 @@
             this.PathLabel.TabIndex = 1;
             this.PathLabel.Text = "Path";
             // 
-            // RegExpLabel
-            // 
-            this.RegExpLabel.AutoSize = true;
-            this.RegExpLabel.Location = new System.Drawing.Point(12, 73);
-            this.RegExpLabel.Name = "RegExpLabel";
-            this.RegExpLabel.Size = new System.Drawing.Size(106, 15);
-            this.RegExpLabel.TabIndex = 2;
-            this.RegExpLabel.Text = "Regular Expression";
-            // 
-            // RegExpTextBox
-            // 
-            this.RegExpTextBox.Location = new System.Drawing.Point(157, 70);
-            this.RegExpTextBox.Name = "RegExpTextBox";
-            this.RegExpTextBox.Size = new System.Drawing.Size(1016, 23);
-            this.RegExpTextBox.TabIndex = 2;
-            // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(157, 41);
+            this.SearchTextBox.Location = new System.Drawing.Point(157, 80);
             this.SearchTextBox.Name = "SearchTextBox";
-            this.SearchTextBox.Size = new System.Drawing.Size(1016, 23);
-            this.SearchTextBox.TabIndex = 1;
-            this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBoxTextChanged);
+            this.SearchTextBox.Size = new System.Drawing.Size(856, 23);
+            this.SearchTextBox.TabIndex = 2;
+            this.SearchTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Search);
             // 
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 44);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 83);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(42, 15);
             this.SearchLabel.TabIndex = 5;
@@ -95,36 +78,46 @@
             this.ResultsListBox.Location = new System.Drawing.Point(12, 130);
             this.ResultsListBox.Name = "ResultsListBox";
             this.ResultsListBox.Size = new System.Drawing.Size(1161, 304);
-            this.ResultsListBox.TabIndex = 4;
+            this.ResultsListBox.TabIndex = 3;
             // 
             // FileTypeLabel
             // 
             this.FileTypeLabel.AutoSize = true;
-            this.FileTypeLabel.Location = new System.Drawing.Point(12, 102);
+            this.FileTypeLabel.Location = new System.Drawing.Point(12, 47);
             this.FileTypeLabel.Name = "FileTypeLabel";
-            this.FileTypeLabel.Size = new System.Drawing.Size(164, 15);
+            this.FileTypeLabel.Size = new System.Drawing.Size(249, 15);
             this.FileTypeLabel.TabIndex = 8;
-            this.FileTypeLabel.Text = "In File Types (separated by \";\")";
+            this.FileTypeLabel.Text = "In these file types (e.g. \"*.cs\", separated by \";\")";
             // 
             // FileTypeTextBox
             // 
-            this.FileTypeTextBox.Location = new System.Drawing.Point(182, 99);
+            this.FileTypeTextBox.Location = new System.Drawing.Point(267, 44);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
-            this.FileTypeTextBox.Size = new System.Drawing.Size(991, 23);
-            this.FileTypeTextBox.TabIndex = 3;
+            this.FileTypeTextBox.Size = new System.Drawing.Size(906, 23);
+            this.FileTypeTextBox.TabIndex = 1;
+            // 
+            // IgnoreCaseCheckBox
+            // 
+            this.IgnoreCaseCheckBox.AutoSize = true;
+            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(1019, 82);
+            this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
+            this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
+            this.IgnoreCaseCheckBox.TabIndex = 9;
+            this.IgnoreCaseCheckBox.Text = "Ignore Case";
+            this.IgnoreCaseCheckBox.UseVisualStyleBackColor = true;
+            this.IgnoreCaseCheckBox.CheckedChanged += new System.EventHandler(this.Search);
             // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1185, 445);
+            this.Controls.Add(this.IgnoreCaseCheckBox);
             this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.ResultsListBox);
             this.Controls.Add(this.SearchLabel);
             this.Controls.Add(this.SearchTextBox);
-            this.Controls.Add(this.RegExpTextBox);
-            this.Controls.Add(this.RegExpLabel);
             this.Controls.Add(this.PathLabel);
             this.Controls.Add(this.PathTextBox);
             this.Name = "MainWindowBackend";
@@ -138,12 +131,11 @@
 
         private TextBox PathTextBox;
         private Label PathLabel;
-        private Label RegExpLabel;
-        private TextBox RegExpTextBox;
         private TextBox SearchTextBox;
         private Label SearchLabel;
         private ListBox ResultsListBox;
         private Label FileTypeLabel;
         private TextBox FileTypeTextBox;
+        private CheckBox IgnoreCaseCheckBox;
     }
 }
