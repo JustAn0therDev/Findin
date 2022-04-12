@@ -17,6 +17,8 @@ The list below is a technical detail about how some features should be implement
 	- Line number
 	- Column number (index)
 
+- Change the "TextChanged" event in the text box for something else, this is related to the "Re-think user experience" task.
+
 ## In Development
 
 It is still in development but it should take long before its ready. Here is the "TODO List" of remaining tasks:
