@@ -78,7 +78,7 @@ namespace Findin
 
             foreach (var fileName in fileNames)
             {
-                StringBuilder sb = new(await File.ReadAllTextAsync(fileName));
+                StringBuilder sb = new(await File.ReadAllTextAsync(fileName, encoding: Encoding.UTF8));
 
                 string fileContent = sb.ToString();
 
@@ -230,7 +230,7 @@ namespace Findin
 
                 if (!string.IsNullOrEmpty(selectedFile))
                 {
-                    string fileName = selectedFile.Split(' ')[0];
+                    string fileName = selectedFile.Split(" at")[0];
 
                     Process.Start(DefaultProgramPath, fileName);
                 }
