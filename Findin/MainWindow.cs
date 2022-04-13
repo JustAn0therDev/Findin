@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Findin
@@ -7,8 +8,40 @@ namespace Findin
     {
         public MainWindowBackend() => InitializeComponent();
 
+        private const string FormStateFileName = "state.bin";
+
+        private void OnFormLoad(object sender, EventArgs e)
+        {
+            if (File.Exists(FormStateFileName))
+            {
+                using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
+                FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
+
+                if (formState == null) return;
+
+                PathTextBox.Text = formState.Path;
+                FileTypeTextBox.Text = formState.FileTypes;
+                SearchTextBox.Text = formState.Search;
+                IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
+            }
+        }
+
+        private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '\r')
+            {
+                Search(sender, e);
+            }
+        }
+
         public void Search(object sender, EventArgs e)
         {
+            if (!TextBoxHasValue(FileTypeTextBox))
+            {
+                ShowEmptyFieldAlert(FileTypeTextBox);
+                return;
+            }
+
             string fileTypes = CleanFileTypesString(FileTypeTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
@@ -22,10 +55,10 @@ namespace Findin
             string path = PathTextBox.Text;
             string search = SearchTextBox.Text;
 
-            Task.Run(() => ShowResults(path, search, fileTypes));
+            ShowResults(path, search, fileTypes);
         }
 
-        private void ShowResults(string path, string search, string fileTypes)
+        private async void ShowResults(string path, string search, string fileTypes)
         {
             ResultsListBox.Items.Clear();
 
@@ -35,24 +68,34 @@ namespace Findin
 
             List<string> fileNames = string.IsNullOrEmpty(fileTypes) ? GetAllFileNames(directories) : GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
 
-            List<string> results = new();
-
             string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $"(?i){search}" : search;
 
-            Parallel.ForEach(fileNames, fileName =>
+            foreach (var fileName in fileNames)
             {
-                StringBuilder sb = new(File.ReadAllText(fileName));
+                StringBuilder sb = new(await File.ReadAllTextAsync(fileName));
 
                 string fileContent = sb.ToString();
 
                 MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
-                if (matches.Count > 0)
-                    foreach (Match match in matches)
-                        results.Add($"{fileName}: \"{ReadWholeLine(fileContent, match.Index)}\"");
-            });
+                foreach (Match match in matches)
+                    ResultsListBox.Items.Add($"{fileName} at line {GetLineNumber(fileContent, match.Index)}: \"{ReadWholeLine(fileContent, match.Index)}\"");
+            }
+        }
 
-            foreach (var result in results) ResultsListBox.Items.Add(result);
+        private static int GetLineNumber(string input, int matchIndex)
+        {
+            int lineNumber = 1;
+
+            int idx = 0;
+
+            while (idx != matchIndex)
+            {
+                if (input[idx] == '\r') lineNumber++;
+                idx++;
+            }
+
+            return lineNumber;
         }
 
         private static string ReadWholeLine(string input, int matchIndex)
@@ -64,7 +107,6 @@ namespace Findin
             // Going forward
             while (forwardIndex < input.Length - 1)
             {
-                // TODO: make this better. Not every time the line breaks will be this consistent.
                 if (input[forwardIndex] == '\r')
                 {
                     break;
@@ -77,7 +119,6 @@ namespace Findin
             // Going backwards
             while (backwardIndex >= 0)
             {
-                // TODO: make this better. Not every time the line breaks will be this consistent.
                 if (input[backwardIndex] == '\n')
                 {
                     break;
@@ -135,6 +176,13 @@ namespace Findin
         private static void ShowEmptyFieldAlert(TextBox textBox)
         {
             MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
+        }
+
+        private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var formState = new FormState(PathTextBox.Text, FileTypeTextBox.Text, SearchTextBox.Text, IgnoreCaseCheckBox.Checked);
+            string serializedFormState = JsonSerializer.Serialize(formState);
+            File.WriteAllBytes(FormStateFileName, Encoding.UTF8.GetBytes(serializedFormState));
         }
     }
 }

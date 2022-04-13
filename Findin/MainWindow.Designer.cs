@@ -36,13 +36,14 @@
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
             this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
+            this.SearchButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PathTextBox
             // 
             this.PathTextBox.Location = new System.Drawing.Point(157, 12);
             this.PathTextBox.Name = "PathTextBox";
-            this.PathTextBox.Size = new System.Drawing.Size(1016, 23);
+            this.PathTextBox.Size = new System.Drawing.Size(1236, 23);
             this.PathTextBox.TabIndex = 0;
             // 
             // PathLabel
@@ -56,16 +57,16 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(157, 80);
+            this.SearchTextBox.Location = new System.Drawing.Point(157, 78);
             this.SearchTextBox.Name = "SearchTextBox";
-            this.SearchTextBox.Size = new System.Drawing.Size(856, 23);
+            this.SearchTextBox.Size = new System.Drawing.Size(1236, 23);
             this.SearchTextBox.TabIndex = 2;
-            this.SearchTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Search);
+            this.SearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 83);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 82);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(42, 15);
             this.SearchLabel.TabIndex = 5;
@@ -75,10 +76,12 @@
             // 
             this.ResultsListBox.FormattingEnabled = true;
             this.ResultsListBox.ItemHeight = 15;
-            this.ResultsListBox.Location = new System.Drawing.Point(12, 130);
+            this.ResultsListBox.Location = new System.Drawing.Point(12, 160);
+            this.ResultsListBox.MaximumSize = new System.Drawing.Size(1475, 484);
+            this.ResultsListBox.MinimumSize = new System.Drawing.Size(1475, 484);
             this.ResultsListBox.Name = "ResultsListBox";
-            this.ResultsListBox.Size = new System.Drawing.Size(1161, 304);
-            this.ResultsListBox.TabIndex = 3;
+            this.ResultsListBox.Size = new System.Drawing.Size(1475, 484);
+            this.ResultsListBox.TabIndex = 5;
             // 
             // FileTypeLabel
             // 
@@ -93,25 +96,35 @@
             // 
             this.FileTypeTextBox.Location = new System.Drawing.Point(267, 44);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
-            this.FileTypeTextBox.Size = new System.Drawing.Size(906, 23);
+            this.FileTypeTextBox.Size = new System.Drawing.Size(1126, 23);
             this.FileTypeTextBox.TabIndex = 1;
             // 
             // IgnoreCaseCheckBox
             // 
             this.IgnoreCaseCheckBox.AutoSize = true;
-            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(1019, 82);
+            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(1399, 82);
             this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
             this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
-            this.IgnoreCaseCheckBox.TabIndex = 9;
+            this.IgnoreCaseCheckBox.TabIndex = 3;
             this.IgnoreCaseCheckBox.Text = "Ignore Case";
             this.IgnoreCaseCheckBox.UseVisualStyleBackColor = true;
-            this.IgnoreCaseCheckBox.CheckedChanged += new System.EventHandler(this.Search);
+            // 
+            // SearchButton
+            // 
+            this.SearchButton.Location = new System.Drawing.Point(1060, 109);
+            this.SearchButton.Name = "SearchButton";
+            this.SearchButton.Size = new System.Drawing.Size(427, 45);
+            this.SearchButton.TabIndex = 4;
+            this.SearchButton.Text = "Search";
+            this.SearchButton.UseVisualStyleBackColor = true;
+            this.SearchButton.Click += new System.EventHandler(this.Search);
             // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1185, 445);
+            this.ClientSize = new System.Drawing.Size(1499, 655);
+            this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.IgnoreCaseCheckBox);
             this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
@@ -120,8 +133,12 @@
             this.Controls.Add(this.SearchTextBox);
             this.Controls.Add(this.PathLabel);
             this.Controls.Add(this.PathTextBox);
+            this.MaximizeBox = false;
             this.Name = "MainWindowBackend";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Find In";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindowBackend_FormClosing);
+            this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -137,5 +154,6 @@
         private Label FileTypeLabel;
         private TextBox FileTypeTextBox;
         private CheckBox IgnoreCaseCheckBox;
+        private Button SearchButton;
     }
 }
