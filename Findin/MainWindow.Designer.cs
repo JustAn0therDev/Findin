@@ -37,6 +37,8 @@
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
             this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.SearchButton = new System.Windows.Forms.Button();
+            this.FolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -60,7 +62,7 @@
             this.SearchTextBox.Location = new System.Drawing.Point(157, 78);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(1236, 23);
-            this.SearchTextBox.TabIndex = 2;
+            this.SearchTextBox.TabIndex = 3;
             this.SearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
             // SearchLabel
@@ -81,7 +83,8 @@
             this.ResultsListBox.MinimumSize = new System.Drawing.Size(1475, 484);
             this.ResultsListBox.Name = "ResultsListBox";
             this.ResultsListBox.Size = new System.Drawing.Size(1475, 484);
-            this.ResultsListBox.TabIndex = 5;
+            this.ResultsListBox.TabIndex = 6;
+            this.ResultsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ResultsListBox_MouseDoubleClick);
             // 
             // FileTypeLabel
             // 
@@ -97,7 +100,7 @@
             this.FileTypeTextBox.Location = new System.Drawing.Point(267, 44);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
             this.FileTypeTextBox.Size = new System.Drawing.Size(1126, 23);
-            this.FileTypeTextBox.TabIndex = 1;
+            this.FileTypeTextBox.TabIndex = 2;
             // 
             // IgnoreCaseCheckBox
             // 
@@ -105,7 +108,7 @@
             this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(1399, 82);
             this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
             this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
-            this.IgnoreCaseCheckBox.TabIndex = 3;
+            this.IgnoreCaseCheckBox.TabIndex = 4;
             this.IgnoreCaseCheckBox.Text = "Ignore Case";
             this.IgnoreCaseCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -114,16 +117,27 @@
             this.SearchButton.Location = new System.Drawing.Point(1060, 109);
             this.SearchButton.Name = "SearchButton";
             this.SearchButton.Size = new System.Drawing.Size(427, 45);
-            this.SearchButton.TabIndex = 4;
+            this.SearchButton.TabIndex = 5;
             this.SearchButton.Text = "Search";
             this.SearchButton.UseVisualStyleBackColor = true;
             this.SearchButton.Click += new System.EventHandler(this.Search);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1399, 11);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(88, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Select Folder";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.SelectFolderButton_Click);
             // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1499, 655);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.IgnoreCaseCheckBox);
             this.Controls.Add(this.FileTypeTextBox);
@@ -155,5 +169,7 @@
         private TextBox FileTypeTextBox;
         private CheckBox IgnoreCaseCheckBox;
         private Button SearchButton;
+        private FolderBrowserDialog FolderBrowser;
+        private Button button1;
     }
 }

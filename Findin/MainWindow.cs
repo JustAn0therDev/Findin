@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -183,6 +184,33 @@ namespace Findin
             var formState = new FormState(PathTextBox.Text, FileTypeTextBox.Text, SearchTextBox.Text, IgnoreCaseCheckBox.Checked);
             string serializedFormState = JsonSerializer.Serialize(formState);
             File.WriteAllBytes(FormStateFileName, Encoding.UTF8.GetBytes(serializedFormState));
+        }
+
+        private void SelectFolderButton_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = FolderBrowser.ShowDialog();
+
+            if (dialogResult == DialogResult.OK)
+            {
+                PathTextBox.Text = FolderBrowser.SelectedPath;
+            }
+        }
+
+        private void ResultsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int itemIndex = ResultsListBox.IndexFromPoint(e.Location);
+
+            if (itemIndex != ListBox.NoMatches)
+            {
+                string? selectedFile = ResultsListBox.Items[itemIndex] as string;
+
+                if (!string.IsNullOrEmpty(selectedFile))
+                {
+                    string fileName = selectedFile.Split(' ')[0];
+
+                    Process.Start("notepad.exe", fileName);
+                }
+            }
         }
     }
 }
