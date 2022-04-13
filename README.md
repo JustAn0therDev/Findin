@@ -32,7 +32,8 @@ It is still in development but it should take long before its ready. Here is the
 - ~~Allow the user to locate a path by searching for it inside the program with a folder helper~~;
 - ~~Save the last search in a file that is always updated by each search made (this makes the "Search" button even better)~~;
 - ~~_If a search button is really used, it should have a consistent tab index for a good navigation_~~;
-- Fix Regex when searching for characters such as "(" and ".";
+- ~~Fix Regex when searching for characters such as "(" and "."~~;
+- Fix file paths with spaces;
 - Allow for tabs with separate search states.
 
 The list is updated per feature implementation, change request or bug fix.
