@@ -72,7 +72,9 @@ namespace Findin
 
             List<string> fileNames = string.IsNullOrEmpty(fileTypes) ? GetAllFileNames(directories) : GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
 
-            string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $"(?i){search}" : search;
+            search = FixSearchPattern(search);
+
+            string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
 
             foreach (var fileName in fileNames)
             {
@@ -85,6 +87,18 @@ namespace Findin
                 foreach (Match match in matches)
                     ResultsListBox.Items.Add($"{fileName} at line {GetLineNumber(fileContent, match.Index)}: \"{ReadWholeLine(fileContent, match.Index)}\"");
             }
+        }
+
+        private static string FixSearchPattern(string search)
+        {
+            StringBuilder sb = new();
+
+            foreach (char c in search)
+            {
+                sb.Append(Regex.IsMatch(c.ToString(), @"\W") ? $@"\{c}" : c);
+            }
+
+            return sb.ToString();
         }
 
         private static int GetLineNumber(string input, int matchIndex)
