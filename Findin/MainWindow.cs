@@ -70,7 +70,7 @@ namespace Findin
 
             PopulateListOfSubDirectoriesInPath(directories, path);
 
-            List<string> fileNames = string.IsNullOrEmpty(fileTypes) ? GetAllFileNames(directories) : GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
+            List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
 
             search = FixSearchPattern(search);
 
@@ -85,7 +85,20 @@ namespace Findin
                 MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
                 foreach (Match match in matches)
-                    ResultsListBox.Items.Add($"{fileName} at line {GetLineNumber(fileContent, match.Index)}: \"{ReadWholeLine(fileContent, match.Index)}\"");
+                {
+                    (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
+                    ResultsListBox.Items.Add($"{fileName} at line {lineNumber}: \"{lineContent}\"");
+                }
+            }
+        }
+
+        private void LoadDirectoryContents(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(PathTextBox.Text))
+            {
+                List<string> directories = new() { Directory.GetCurrentDirectory() };
+                PopulateListOfSubDirectoriesInPath(directories, PathTextBox.Text);
+                GetAllFileNames(directories);
             }
         }
 
@@ -101,7 +114,7 @@ namespace Findin
             return sb.ToString();
         }
 
-        private static int GetLineNumber(string input, int matchIndex)
+        private static (int, string) ReadWholeLine(string input, int matchIndex)
         {
             int lineNumber = 1;
 
@@ -109,15 +122,12 @@ namespace Findin
 
             while (idx != matchIndex)
             {
-                if (input[idx] == '\r') lineNumber++;
+                if (input[idx] == '\r') 
+                    lineNumber++;
+
                 idx++;
             }
 
-            return lineNumber;
-        }
-
-        private static string ReadWholeLine(string input, int matchIndex)
-        {
             StringBuilder backwardResult = new();
             StringBuilder forwardResult = new();
             int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
@@ -146,7 +156,7 @@ namespace Findin
                 backwardIndex--;
             }
 
-            return (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim();
+            return (lineNumber, (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim());
         }
 
         private static List<string> GetAllFileNames(List<string> directories)
