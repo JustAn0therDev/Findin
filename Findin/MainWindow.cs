@@ -11,6 +11,8 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
 
+        private string DefaultProgramPath { get; set; }
+
         private void OnFormLoad(object sender, EventArgs e)
         {
             if (File.Exists(FormStateFileName))
@@ -24,6 +26,7 @@ namespace Findin
                 FileTypeTextBox.Text = formState.FileTypes;
                 SearchTextBox.Text = formState.Search;
                 IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
+                DefaultProgramPath = formState.DefaultProgramPath;
             }
         }
 
@@ -181,23 +184,30 @@ namespace Findin
 
         private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var formState = new FormState(PathTextBox.Text, FileTypeTextBox.Text, SearchTextBox.Text, IgnoreCaseCheckBox.Checked);
+            var formState = new FormState(PathTextBox.Text, FileTypeTextBox.Text, SearchTextBox.Text, IgnoreCaseCheckBox.Checked, DefaultProgramPath);
             string serializedFormState = JsonSerializer.Serialize(formState);
             File.WriteAllBytes(FormStateFileName, Encoding.UTF8.GetBytes(serializedFormState));
         }
 
         private void SelectFolderButton_Click(object sender, EventArgs e)
         {
-            DialogResult dialogResult = FolderBrowser.ShowDialog();
+            DialogResult dialogResult = PathFolderBrowser.ShowDialog();
 
             if (dialogResult == DialogResult.OK)
             {
-                PathTextBox.Text = FolderBrowser.SelectedPath;
+                PathTextBox.Text = PathFolderBrowser.SelectedPath;
             }
         }
 
         private void ResultsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            if (string.IsNullOrEmpty(DefaultProgramPath))
+            {
+                MessageBox.Show("You do not have a default program to open the file when clicking on a search result.\nIf you want to open the file in a program of your preference " +
+                    "you can do that by clicking the \"Set Default Program Path\" button and selecting a program!\nIt can be a text editor or an IDE.", "Warning!", MessageBoxButtons.OK);
+                return;
+            }
+
             int itemIndex = ResultsListBox.IndexFromPoint(e.Location);
 
             if (itemIndex != ListBox.NoMatches)
@@ -208,8 +218,18 @@ namespace Findin
                 {
                     string fileName = selectedFile.Split(' ')[0];
 
-                    Process.Start("notepad.exe", fileName);
+                    Process.Start(DefaultProgramPath, fileName);
                 }
+            }
+        }
+
+        private void SetDefaultProgramPathButton_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = DefaultProgramFileDialog.ShowDialog();
+
+            if (dialogResult == DialogResult.OK)
+            {
+                DefaultProgramPath = DefaultProgramFileDialog.FileName;
             }
         }
     }

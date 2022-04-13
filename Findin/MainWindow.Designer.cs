@@ -37,15 +37,17 @@
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
             this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.SearchButton = new System.Windows.Forms.Button();
-            this.FolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            this.PathFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.button1 = new System.Windows.Forms.Button();
+            this.SetDefaultProgramPathButton = new System.Windows.Forms.Button();
+            this.DefaultProgramFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // PathTextBox
             // 
             this.PathTextBox.Location = new System.Drawing.Point(157, 12);
             this.PathTextBox.Name = "PathTextBox";
-            this.PathTextBox.Size = new System.Drawing.Size(1236, 23);
+            this.PathTextBox.Size = new System.Drawing.Size(1156, 23);
             this.PathTextBox.TabIndex = 0;
             // 
             // PathLabel
@@ -124,19 +126,30 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1399, 11);
+            this.button1.Location = new System.Drawing.Point(1319, 12);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(88, 23);
+            this.button1.Size = new System.Drawing.Size(168, 23);
             this.button1.TabIndex = 1;
             this.button1.Text = "Select Folder";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.SelectFolderButton_Click);
+            // 
+            // SetDefaultProgramPathButton
+            // 
+            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(12, 107);
+            this.SetDefaultProgramPathButton.Name = "SetDefaultProgramPathButton";
+            this.SetDefaultProgramPathButton.Size = new System.Drawing.Size(284, 45);
+            this.SetDefaultProgramPathButton.TabIndex = 9;
+            this.SetDefaultProgramPathButton.Text = "Set Default Program Path";
+            this.SetDefaultProgramPathButton.UseVisualStyleBackColor = true;
+            this.SetDefaultProgramPathButton.Click += new System.EventHandler(this.SetDefaultProgramPathButton_Click);
             // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1499, 655);
+            this.Controls.Add(this.SetDefaultProgramPathButton);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.IgnoreCaseCheckBox);
@@ -169,7 +182,9 @@
         private TextBox FileTypeTextBox;
         private CheckBox IgnoreCaseCheckBox;
         private Button SearchButton;
-        private FolderBrowserDialog FolderBrowser;
+        private FolderBrowserDialog PathFolderBrowser;
         private Button button1;
+        private Button SetDefaultProgramPathButton;
+        private OpenFileDialog DefaultProgramFileDialog;
     }
 }
