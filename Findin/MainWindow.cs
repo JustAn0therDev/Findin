@@ -92,15 +92,6 @@ namespace Findin
             }
         }
 
-        private void LoadDirectoryContents(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(PathTextBox.Text))
-            {
-                List<string> directories = new() { Directory.GetCurrentDirectory() };
-                PopulateListOfSubDirectoriesInPath(directories, PathTextBox.Text);
-                GetAllFileNames(directories);
-            }
-        }
 
         private static string FixSearchPattern(string search)
         {
