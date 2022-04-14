@@ -92,7 +92,6 @@ namespace Findin
             }
         }
 
-
         private static string FixSearchPattern(string search)
         {
             StringBuilder sb = new();
@@ -148,18 +147,6 @@ namespace Findin
             }
 
             return (lineNumber, (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim());
-        }
-
-        private static List<string> GetAllFileNames(List<string> directories)
-        {
-            List<string> fileNames = new();
-
-            foreach (var directory in directories)
-            {
-                fileNames.AddRange(Directory.GetFiles(directory));
-            }
-
-            return fileNames;
         }
 
         private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string fileTypes)
