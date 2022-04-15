@@ -34,9 +34,9 @@ It is still in development but it should take long before its ready. Here is the
 - ~~_If a search button is really used, it should have a consistent tab index for a good navigation_~~;
 - ~~Fix Regex when searching for characters such as "(" and "."~~;
 - ~~Fix file paths with spaces~~;
-- Fix performance issue in the first directory loading, where the program must search for every possible directory (try `IEnumerate`);
+- ~~Fix performance issue in the first directory loading, where the program must search for every possible directory (try `EnumerateFiles`)~~;
 - Re-think how the file type filter is made, with the user's input or not;
-- Allow the user to ignore certain directories;
+- ~~Allow the user to ignore certain directories~~;
 - Allow for tabs with separate search states.
 
 The list is updated per feature implementation, change request or bug fix.
