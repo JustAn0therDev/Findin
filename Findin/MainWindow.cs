@@ -220,7 +220,7 @@ namespace Findin
                 {
                     string fileName = selectedFile.Split(" at")[0];
 
-                    Process.Start(DefaultProgramPath, fileName);
+                    Process.Start(DefaultProgramPath, $"\"{fileName}\"");
                 }
             }
         }
