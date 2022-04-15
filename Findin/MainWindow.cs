@@ -27,6 +27,7 @@ namespace Findin
                 SearchTextBox.Text = formState.Search;
                 IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
                 DefaultProgramPath = formState.DefaultProgramPath;
+                IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
             }
         }
 
@@ -38,7 +39,7 @@ namespace Findin
             }
         }
 
-        public void Search(object sender, EventArgs e)
+        public async void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FileTypeTextBox))
             {
@@ -46,7 +47,8 @@ namespace Findin
                 return;
             }
 
-            string fileTypes = CleanFileTypesString(FileTypeTextBox.Text);
+            string fileTypes = CleanSemiColonString(FileTypeTextBox.Text);
+            string ignoreDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
             {
@@ -54,15 +56,12 @@ namespace Findin
                 return;
             }
 
-            if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes)) return;
+            if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes) || fileTypes.Contains("*.*")) return;
 
-            string path = PathTextBox.Text;
-            string search = SearchTextBox.Text;
-
-            ShowResults(path, search, fileTypes);
+            ShowResults(PathTextBox.Text, SearchTextBox.Text, fileTypes, ignoreDirectories);
         }
 
-        private async void ShowResults(string path, string search, string fileTypes)
+        private async void ShowResults(string path, string search, string fileTypes, string ignoredDirectories)
         {
             ResultsListBox.Items.Clear();
 
@@ -70,7 +69,7 @@ namespace Findin
 
             PopulateListOfSubDirectoriesInPath(directories, path);
 
-            List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, fileTypes);
+            List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, ignoredDirectories, fileTypes);
 
             search = FixSearchPattern(search);
 
@@ -94,14 +93,14 @@ namespace Findin
 
         private static string FixSearchPattern(string search)
         {
-            StringBuilder sb = new();
+            MatchCollection matches = Regex.Matches(search, @$"\W");
 
-            foreach (char c in search)
+            foreach (Match match in matches)
             {
-                sb.Append(Regex.IsMatch(c.ToString(), @"\W") ? $@"\{c}" : c);
+                search = search.Replace(match.Value, $@"\{match.Value}");
             }
 
-            return sb.ToString();
+            return search;
         }
 
         private static (int, string) ReadWholeLine(string input, int matchIndex)
@@ -112,7 +111,7 @@ namespace Findin
 
             while (idx != matchIndex)
             {
-                if (input[idx] == '\r') 
+                if (input[idx] == '\r')
                     lineNumber++;
 
                 idx++;
@@ -149,22 +148,41 @@ namespace Findin
             return (lineNumber, (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim());
         }
 
-        private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string fileTypes)
+        private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string directoriesToIgnore, string fileTypes)
         {
             List<string> fileNames = new();
 
             string[] fileTypeArray = fileTypes.Split(';');
+            string[] ignoredDirectoriesArray = directoriesToIgnore.Split(';');
 
             foreach (var directory in directories)
             {
+                if (InIgnoredDirectories(ignoredDirectoriesArray, directory))
+                    continue;
+
                 foreach (var fileType in fileTypeArray)
-                    fileNames.AddRange(Directory.GetFiles(directory, fileType));
+                {
+                    fileNames.AddRange(Directory.EnumerateFiles(directory, fileType));
+                }
             }
 
             return fileNames;
         }
 
-        private static string CleanFileTypesString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
+        public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
+        {
+            foreach (var dir in directoriesToIgnore)
+            {
+                foreach (var path in directory.Split('\\'))
+                {
+                    if (path == dir) return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
         private static void PopulateListOfSubDirectoriesInPath(List<string> subDirectoriesListToPopulate, string path)
         {
@@ -186,7 +204,14 @@ namespace Findin
 
         private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var formState = new FormState(PathTextBox.Text, FileTypeTextBox.Text, SearchTextBox.Text, IgnoreCaseCheckBox.Checked, DefaultProgramPath);
+            var formState = new FormState(
+                PathTextBox.Text,
+                FileTypeTextBox.Text,
+                SearchTextBox.Text,
+                IgnoreCaseCheckBox.Checked,
+                DefaultProgramPath,
+                IgnoreDirectoriesTextBox.Text);
+
             string serializedFormState = JsonSerializer.Serialize(formState);
             File.WriteAllBytes(FormStateFileName, Encoding.UTF8.GetBytes(serializedFormState));
         }

@@ -41,6 +41,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.SetDefaultProgramPathButton = new System.Windows.Forms.Button();
             this.DefaultProgramFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.IgnoreDirectoriesLabel = new System.Windows.Forms.Label();
+            this.IgnoreDirectoriesTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -61,7 +63,7 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(60, 78);
+            this.SearchTextBox.Location = new System.Drawing.Point(60, 114);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(365, 23);
             this.SearchTextBox.TabIndex = 3;
@@ -70,7 +72,7 @@
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 82);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 117);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(42, 15);
             this.SearchLabel.TabIndex = 5;
@@ -80,9 +82,9 @@
             // 
             this.ResultsListBox.FormattingEnabled = true;
             this.ResultsListBox.ItemHeight = 15;
-            this.ResultsListBox.Location = new System.Drawing.Point(12, 145);
+            this.ResultsListBox.Location = new System.Drawing.Point(12, 190);
             this.ResultsListBox.Name = "ResultsListBox";
-            this.ResultsListBox.Size = new System.Drawing.Size(1003, 484);
+            this.ResultsListBox.Size = new System.Drawing.Size(1003, 439);
             this.ResultsListBox.TabIndex = 6;
             this.ResultsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ResultsListBox_MouseDoubleClick);
             // 
@@ -91,21 +93,21 @@
             this.FileTypeLabel.AutoSize = true;
             this.FileTypeLabel.Location = new System.Drawing.Point(12, 47);
             this.FileTypeLabel.Name = "FileTypeLabel";
-            this.FileTypeLabel.Size = new System.Drawing.Size(207, 15);
+            this.FileTypeLabel.Size = new System.Drawing.Size(56, 15);
             this.FileTypeLabel.TabIndex = 8;
-            this.FileTypeLabel.Text = "File types (e.g. \"*.cs\", separated by \";\")";
+            this.FileTypeLabel.Text = "File types";
             // 
             // FileTypeTextBox
             // 
-            this.FileTypeTextBox.Location = new System.Drawing.Point(225, 44);
+            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 44);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
-            this.FileTypeTextBox.Size = new System.Drawing.Size(200, 23);
+            this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
             this.FileTypeTextBox.TabIndex = 2;
             // 
             // IgnoreCaseCheckBox
             // 
             this.IgnoreCaseCheckBox.AutoSize = true;
-            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(337, 110);
+            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(337, 161);
             this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
             this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
             this.IgnoreCaseCheckBox.TabIndex = 4;
@@ -116,7 +118,7 @@
             // 
             this.SearchButton.Location = new System.Drawing.Point(660, 12);
             this.SearchButton.Name = "SearchButton";
-            this.SearchButton.Size = new System.Drawing.Size(355, 89);
+            this.SearchButton.Size = new System.Drawing.Size(355, 23);
             this.SearchButton.TabIndex = 5;
             this.SearchButton.Text = "Search";
             this.SearchButton.UseVisualStyleBackColor = true;
@@ -134,7 +136,7 @@
             // 
             // SetDefaultProgramPathButton
             // 
-            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(12, 107);
+            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(12, 161);
             this.SetDefaultProgramPathButton.Name = "SetDefaultProgramPathButton";
             this.SetDefaultProgramPathButton.Size = new System.Drawing.Size(319, 23);
             this.SetDefaultProgramPathButton.TabIndex = 9;
@@ -142,11 +144,29 @@
             this.SetDefaultProgramPathButton.UseVisualStyleBackColor = true;
             this.SetDefaultProgramPathButton.Click += new System.EventHandler(this.SetDefaultProgramPathButton_Click);
             // 
+            // IgnoreDirectoriesLabel
+            // 
+            this.IgnoreDirectoriesLabel.AutoSize = true;
+            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 82);
+            this.IgnoreDirectoriesLabel.Name = "IgnoreDirectoriesLabel";
+            this.IgnoreDirectoriesLabel.Size = new System.Drawing.Size(100, 15);
+            this.IgnoreDirectoriesLabel.TabIndex = 5;
+            this.IgnoreDirectoriesLabel.Text = "Ignore Directories";
+            // 
+            // IgnoreDirectoriesTextBox
+            // 
+            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 79);
+            this.IgnoreDirectoriesTextBox.Name = "IgnoreDirectoriesTextBox";
+            this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(307, 23);
+            this.IgnoreDirectoriesTextBox.TabIndex = 10;
+            // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1027, 655);
+            this.Controls.Add(this.IgnoreDirectoriesTextBox);
+            this.Controls.Add(this.IgnoreDirectoriesLabel);
             this.Controls.Add(this.SetDefaultProgramPathButton);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
@@ -184,5 +204,7 @@
         private Button button1;
         private Button SetDefaultProgramPathButton;
         private OpenFileDialog DefaultProgramFileDialog;
+        private Label IgnoreDirectoriesLabel;
+        private TextBox IgnoreDirectoriesTextBox;
     }
 }
