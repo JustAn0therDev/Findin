@@ -35,7 +35,7 @@ It is still in development but it should take long before its ready. Here is the
 - ~~Fix Regex when searching for characters such as "(" and "."~~;
 - ~~Fix file paths with spaces~~;
 - ~~Fix performance issue in the first directory loading, where the program must search for every possible directory (try `EnumerateFiles`)~~;
-- Re-think how the file type filter is made, with the user's input or not;
+- Allow the user to fill a JSON file with configs for "default allowed" file types and ignored directories;
 - ~~Allow the user to ignore certain directories~~;
 - Allow for tabs with separate search states.
 
