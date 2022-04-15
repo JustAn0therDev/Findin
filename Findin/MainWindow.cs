@@ -10,6 +10,8 @@ namespace Findin
         public MainWindowBackend() => InitializeComponent();
 
         private const string FormStateFileName = "state.bin";
+        private const string ResultsFoundFormat = "Results found: {0}";
+        private const int RESULT_LIMIT = 50;
 
         private string DefaultProgramPath { get; set; }
 
@@ -39,7 +41,7 @@ namespace Findin
             }
         }
 
-        public async void Search(object sender, EventArgs e)
+        public void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FileTypeTextBox))
             {
@@ -63,31 +65,51 @@ namespace Findin
 
         private async void ShowResults(string path, string search, string fileTypes, string ignoredDirectories)
         {
-            ResultsListBox.Items.Clear();
-
-            List<string> directories = new() { Directory.GetCurrentDirectory() };
-
-            PopulateListOfSubDirectoriesInPath(directories, path);
-
-            List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, ignoredDirectories, fileTypes);
-
-            search = FixSearchPattern(search);
-
-            string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
-
-            foreach (var fileName in fileNames)
+            try
             {
-                StringBuilder sb = new(await File.ReadAllTextAsync(fileName, encoding: Encoding.UTF8));
+                ResultsListBox.Items.Clear();
+                SearchingLabel.Visible = true;
+                ResultsFoundLabel.Visible = false;
 
-                string fileContent = sb.ToString();
+                List<string> directories = new() { Directory.GetCurrentDirectory() };
 
-                MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
+                PopulateListOfSubDirectoriesInPath(directories, path);
 
-                foreach (Match match in matches)
+                List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, ignoredDirectories, fileTypes);
+
+                search = FixSearchPattern(search);
+
+                string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
+
+                foreach (var fileName in fileNames)
                 {
-                    (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
-                    ResultsListBox.Items.Add($"{fileName} at line {lineNumber}: \"{lineContent}\"");
+                    if (ResultsListBox.Items.Count == RESULT_LIMIT)
+                    {
+                        break;
+                    }
+
+                    StringBuilder sb = new(await File.ReadAllTextAsync(fileName, encoding: Encoding.UTF8));
+
+                    string fileContent = sb.ToString();
+
+                    MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
+
+                    foreach (Match match in matches)
+                    {
+                        (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
+
+                        if (ResultsListBox.Items.Count < RESULT_LIMIT)
+                        {
+                            ResultsListBox.Items.Add($"{fileName} at line {lineNumber}: \"{lineContent}\"");
+                        }
+                    }
                 }
+            }
+            finally
+            {
+                SearchingLabel.Visible = false;
+                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
+                ResultsFoundLabel.Visible = true;
             }
         }
 
@@ -175,7 +197,10 @@ namespace Findin
             {
                 foreach (var path in directory.Split('\\'))
                 {
-                    if (path == dir) return true;
+                    if (path == dir)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -197,10 +222,7 @@ namespace Findin
 
         private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
 
-        private static void ShowEmptyFieldAlert(TextBox textBox)
-        {
-            MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
-        }
+        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
 
         private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
         {
