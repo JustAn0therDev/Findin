@@ -16,32 +16,6 @@ namespace Findin
 
         private string DefaultProgramPath { get; set; }
 
-        private void OnFormLoad(object sender, EventArgs e)
-        {
-            if (File.Exists(FormStateFileName))
-            {
-                using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
-                FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
-
-                if (formState == null) return;
-
-                PathTextBox.Text = formState.Path;
-                FileTypeTextBox.Text = formState.FileTypes;
-                SearchTextBox.Text = formState.Search;
-                IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
-                DefaultProgramPath = formState.DefaultProgramPath;
-                IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
-            }
-        }
-
-        private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == '\r')
-            {
-                Search(sender, e);
-            }
-        }
-
         public void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FileTypeTextBox))
@@ -63,6 +37,12 @@ namespace Findin
 
             ShowResults(PathTextBox.Text, SearchTextBox.Text, fileTypes, ignoreDirectories);
         }
+
+        private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
+
+        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
+
+        private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
         private async void ShowResults(string path, string search, string fileTypes, string ignoredDirectories)
         {
@@ -114,15 +94,52 @@ namespace Findin
             }
         }
 
-        private void SetResultsFoundLabelText()
+        private static void PopulateListOfSubDirectoriesInPath(List<string> subDirectoriesListToPopulate, string path)
         {
-            if (ResultsListBox.Items.Count == RESULT_LIMIT)
+            string[] directories = Directory.GetDirectories(path);
+
+            foreach (var directoryPath in directories)
             {
-                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {RESULT_LIMIT} matches.";
-                return;
+                subDirectoriesListToPopulate.Add(directoryPath);
+                PopulateListOfSubDirectoriesInPath(subDirectoriesListToPopulate, directoryPath);
+            }
+        }
+
+        private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string directoriesToIgnore, string fileTypes)
+        {
+            List<string> fileNames = new();
+
+            string[] fileTypeArray = fileTypes.Split(';');
+            string[] ignoredDirectoriesArray = directoriesToIgnore.Split(';');
+
+            foreach (var directory in directories)
+            {
+                if (InIgnoredDirectories(ignoredDirectoriesArray, directory))
+                    continue;
+
+                foreach (var fileType in fileTypeArray)
+                {
+                    fileNames.AddRange(Directory.EnumerateFiles(directory, fileType));
+                }
             }
 
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
+            return fileNames;
+        }
+
+        public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
+        {
+            foreach (var dir in directoriesToIgnore)
+            {
+                foreach (var path in directory.Split('\\'))
+                {
+                    if (path == dir)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static string FixSearchPattern(string search)
@@ -184,59 +201,44 @@ namespace Findin
             return (lineNumber, (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim());
         }
 
-        private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string directoriesToIgnore, string fileTypes)
+        private void SetResultsFoundLabelText()
         {
-            List<string> fileNames = new();
-
-            string[] fileTypeArray = fileTypes.Split(';');
-            string[] ignoredDirectoriesArray = directoriesToIgnore.Split(';');
-
-            foreach (var directory in directories)
+            if (ResultsListBox.Items.Count == RESULT_LIMIT)
             {
-                if (InIgnoredDirectories(ignoredDirectoriesArray, directory))
-                    continue;
-
-                foreach (var fileType in fileTypeArray)
-                {
-                    fileNames.AddRange(Directory.EnumerateFiles(directory, fileType));
-                }
+                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {RESULT_LIMIT} matches.";
+                return;
             }
 
-            return fileNames;
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
         }
 
-        public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
+        #region Events
+
+        private void OnFormLoad(object sender, EventArgs e)
         {
-            foreach (var dir in directoriesToIgnore)
+            if (File.Exists(FormStateFileName))
             {
-                foreach (var path in directory.Split('\\'))
-                {
-                    if (path == dir)
-                    {
-                        return true;
-                    }
-                }
-            }
+                using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
+                FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
 
-            return false;
-        }
+                if (formState == null) return;
 
-        private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
-
-        private static void PopulateListOfSubDirectoriesInPath(List<string> subDirectoriesListToPopulate, string path)
-        {
-            string[] directories = Directory.GetDirectories(path);
-
-            foreach (var directoryPath in directories)
-            {
-                subDirectoriesListToPopulate.Add(directoryPath);
-                PopulateListOfSubDirectoriesInPath(subDirectoriesListToPopulate, directoryPath);
+                PathTextBox.Text = formState.Path;
+                FileTypeTextBox.Text = formState.FileTypes;
+                SearchTextBox.Text = formState.Search;
+                IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
+                DefaultProgramPath = formState.DefaultProgramPath;
+                IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
             }
         }
 
-        private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
-
-        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
+        private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '\r')
+            {
+                Search(sender, e);
+            }
+        }
 
         private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -295,5 +297,7 @@ namespace Findin
                 DefaultProgramPath = DefaultProgramFileDialog.FileName;
             }
         }
+
+        #endregion
     }
 }
