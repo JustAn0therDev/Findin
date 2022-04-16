@@ -10,8 +10,9 @@ namespace Findin
         public MainWindowBackend() => InitializeComponent();
 
         private const string FormStateFileName = "state.bin";
-        private const string ResultsFoundFormat = "Results found: {0}";
+        private const string ResultsFoundFormat = "Matches found: {0}";
         private const int RESULT_LIMIT = 50;
+        private const int MAX_LINE_PREVIEW_SIZE = 120;
 
         private string DefaultProgramPath { get; set; }
 
@@ -68,8 +69,8 @@ namespace Findin
             try
             {
                 ResultsListBox.Items.Clear();
-                SearchingLabel.Visible = true;
                 ResultsFoundLabel.Visible = false;
+                SearchingLabel.Visible = true;
 
                 List<string> directories = new() { Directory.GetCurrentDirectory() };
 
@@ -108,9 +109,20 @@ namespace Findin
             finally
             {
                 SearchingLabel.Visible = false;
-                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
+                SetResultsFoundLabelText();
                 ResultsFoundLabel.Visible = true;
             }
+        }
+
+        private void SetResultsFoundLabelText()
+        {
+            if (ResultsListBox.Items.Count == RESULT_LIMIT)
+            {
+                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {RESULT_LIMIT} matches.";
+                return;
+            }
+
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
         }
 
         private static string FixSearchPattern(string search)
@@ -142,17 +154,19 @@ namespace Findin
             StringBuilder backwardResult = new();
             StringBuilder forwardResult = new();
             int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
+            int charCountFromIndex = 0;
 
             // Going forward
             while (forwardIndex < input.Length - 1)
             {
-                if (input[forwardIndex] == '\r')
+                if (input[forwardIndex] == '\r' || charCountFromIndex == MAX_LINE_PREVIEW_SIZE)
                 {
                     break;
                 }
 
                 forwardResult.Append(input[forwardIndex]);
                 forwardIndex++;
+                charCountFromIndex++;
             }
 
             // Going backwards

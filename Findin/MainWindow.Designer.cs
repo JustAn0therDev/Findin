@@ -165,7 +165,7 @@
             // SearchingLabel
             // 
             this.SearchingLabel.AutoSize = true;
-            this.SearchingLabel.Location = new System.Drawing.Point(947, 151);
+            this.SearchingLabel.Location = new System.Drawing.Point(12, 632);
             this.SearchingLabel.Name = "SearchingLabel";
             this.SearchingLabel.Size = new System.Drawing.Size(68, 15);
             this.SearchingLabel.TabIndex = 9;
