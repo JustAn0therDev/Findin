@@ -135,6 +135,8 @@ namespace Findin
         {
             MatchCollection matches = Regex.Matches(search, @$"\W");
 
+            search = search.Replace(" ", @"\s");
+
             foreach (Match match in matches)
             {
                 search = search.Replace(match.Value, $@"\{match.Value}");
