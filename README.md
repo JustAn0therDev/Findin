@@ -17,7 +17,7 @@ When you open up the program for the first time, this is the screen you'll see:
 And to make sense of each field and button:
 
 - Path: The path where the files you want to search in are located. You can also click the "Select Folder" button and select the path from there;
-- File types: The allowed file types to look for. You can put in a single pattern like `*.cs` or any amount you want, separated by ";" like `*.cs;*.py;*.c;*.go`;
+- File types: The allowed file types to look for. You can put in a single extension like `cs` or any amount of extensions you want, separated by ";" like `cs;py;c;go`;
 - Ignore Directories: The name of directories you would like to ignore during the search. For example, a `node_modules` folder. You can ignore more than one directory like the file type filter: `bin;obj;wwwroot;node_modules`;
 - Search: The search pattern you want to look for. The checkbox right after it allows you to make a case-insentive search;
 - Set Default Program Path: The program you want to open up the files in. For example, if you found the match you were looking for, you can double-click the item listed in the white box and the file will be opened in it:
