@@ -54,10 +54,10 @@ namespace Findin
 
                 List<string> directories = new() { Directory.GetCurrentDirectory() };
 
-                PopulateListOfSubDirectoriesInPath(directories, path);
-
-                List<string> fileNames = GetAllFileNamesFilteredByFileTypes(directories, ignoredDirectories, fileTypes);
-
+                string[] ignoredDirectoriesArray = ignoredDirectories.Split(';');
+                
+                List<string> fileNames = GetAllFileNamesFiltered(path, fileTypes, ignoredDirectoriesArray);
+                
                 search = FixSearchPattern(search);
 
                 string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
@@ -94,36 +94,25 @@ namespace Findin
             }
         }
 
-        private static void PopulateListOfSubDirectoriesInPath(List<string> subDirectoriesListToPopulate, string path)
+        private static List<string> GetAllFileNamesFiltered(string path, string fileTypes, string[] ignoredDirectories)
         {
-            string[] directories = Directory.GetDirectories(path);
-
-            foreach (var directoryPath in directories)
-            {
-                subDirectoriesListToPopulate.Add(directoryPath);
-                PopulateListOfSubDirectoriesInPath(subDirectoriesListToPopulate, directoryPath);
-            }
-        }
-
-        private static List<string> GetAllFileNamesFilteredByFileTypes(List<string> directories, string directoriesToIgnore, string fileTypes)
-        {
-            List<string> fileNames = new();
+            List<string> filteredFileNames = new();
 
             string[] fileTypeArray = fileTypes.Split(';');
-            string[] ignoredDirectoriesArray = directoriesToIgnore.Split(';');
+            string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
 
-            foreach (var directory in directories)
+            foreach (var fileName in allFileNames)
             {
-                if (InIgnoredDirectories(ignoredDirectoriesArray, directory))
-                    continue;
-
                 foreach (var fileType in fileTypeArray)
                 {
-                    fileNames.AddRange(Directory.EnumerateFiles(directory, fileType));
+                    if (fileName.EndsWith(fileType) && !InIgnoredDirectories(ignoredDirectories, fileName))
+                    {
+                        filteredFileNames.Add(fileName);
+                    }
                 }
             }
 
-            return fileNames;
+            return filteredFileNames;
         }
 
         public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
