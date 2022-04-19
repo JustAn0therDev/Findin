@@ -7,11 +7,16 @@ namespace Findin
 {
     public partial class MainWindowBackend : Form
     {
-        public MainWindowBackend() => InitializeComponent();
+        private readonly FileDictionaryWrapper FileDictionaryWrapper = new();
+
+        public MainWindowBackend()
+        {
+            InitializeComponent();
+        }
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const int RESULT_LIMIT = 50;
+        private const int RESULT_LIMIT = 1000;
         private const int MAX_LINE_PREVIEW_SIZE = 120;
 
         private string DefaultProgramPath { get; set; }
@@ -25,7 +30,6 @@ namespace Findin
             }
 
             string fileTypes = CleanSemiColonString(FileTypeTextBox.Text);
-            string ignoreDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
             {
@@ -35,7 +39,7 @@ namespace Findin
 
             if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes) || fileTypes.Contains("*.*")) return;
 
-            ShowResults(PathTextBox.Text, SearchTextBox.Text, fileTypes, ignoreDirectories);
+            ShowResults(SearchTextBox.Text);
         }
 
         private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
@@ -44,7 +48,7 @@ namespace Findin
 
         private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
-        private async void ShowResults(string path, string search, string fileTypes, string ignoredDirectories)
+        private void ShowResults(string search)
         {
             try
             {
@@ -54,24 +58,18 @@ namespace Findin
 
                 List<string> directories = new() { Directory.GetCurrentDirectory() };
 
-                string[] ignoredDirectoriesArray = ignoredDirectories.Split(';');
-                
-                List<string> fileNames = GetAllFileNamesFiltered(path, fileTypes, ignoredDirectoriesArray);
-                
                 search = FixSearchPattern(search);
 
                 string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
 
-                foreach (var fileName in fileNames)
+                foreach (KeyValuePair<string, StringBuilder> keyValuePair in FileDictionaryWrapper.FileNamesToContent)
                 {
                     if (ResultsListBox.Items.Count == RESULT_LIMIT)
                     {
                         break;
                     }
 
-                    StringBuilder sb = new(await File.ReadAllTextAsync(fileName, encoding: Encoding.UTF8));
-
-                    string fileContent = sb.ToString();
+                    string fileContent = keyValuePair.Value.ToString();
 
                     MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
@@ -81,7 +79,7 @@ namespace Findin
 
                         if (ResultsListBox.Items.Count < RESULT_LIMIT)
                         {
-                            ResultsListBox.Items.Add($"{fileName} at line {lineNumber}: \"{lineContent}\"");
+                            ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber}: \"{lineContent}\"");
                         }
                     }
                 }
@@ -94,46 +92,9 @@ namespace Findin
             }
         }
 
-        private static List<string> GetAllFileNamesFiltered(string path, string fileTypes, string[] ignoredDirectories)
-        {
-            List<string> filteredFileNames = new();
-
-            string[] fileTypeArray = fileTypes.Split(';');
-            string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-
-            foreach (var fileName in allFileNames)
-            {
-                foreach (var fileType in fileTypeArray)
-                {
-                    if (fileName.EndsWith(fileType) && !InIgnoredDirectories(ignoredDirectories, fileName))
-                    {
-                        filteredFileNames.Add(fileName);
-                    }
-                }
-            }
-
-            return filteredFileNames;
-        }
-
-        public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
-        {
-            foreach (var dir in directoriesToIgnore)
-            {
-                foreach (var path in directory.Split('\\'))
-                {
-                    if (path == dir)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         private static string FixSearchPattern(string search)
         {
-            MatchCollection matches = Regex.Matches(search, @$"\W");
+            MatchCollection matches = Regex.Matches(search, @$"[^A-Za-z0-9_]+");
 
             search = search.Replace(" ", @"\s");
 
@@ -286,6 +247,15 @@ namespace Findin
             if (dialogResult == DialogResult.OK)
             {
                 DefaultProgramPath = DefaultProgramFileDialog.FileName;
+            }
+        }
+
+        private void UpdateFileDictionary(object sender, EventArgs e)
+        {
+            if (Directory.Exists(PathTextBox.Text))
+            {
+                string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
+                Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
             }
         }
 
