@@ -258,6 +258,7 @@ namespace Findin
         private async void UpdateFileDictionary(object sender, EventArgs e)
         {
             if (IsLoadingDirectory) return;
+
             try
             {
                 if (Directory.Exists(PathTextBox.Text))
