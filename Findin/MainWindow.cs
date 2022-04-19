@@ -16,7 +16,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const int RESULT_LIMIT = 1000;
+        private const int RESULT_LIMIT = 250;
         private const int MAX_LINE_PREVIEW_SIZE = 120;
 
         private string DefaultProgramPath { get; set; }
