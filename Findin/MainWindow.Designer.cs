@@ -45,6 +45,7 @@
             this.IgnoreDirectoriesTextBox = new System.Windows.Forms.TextBox();
             this.SearchingLabel = new System.Windows.Forms.Label();
             this.ResultsFoundLabel = new System.Windows.Forms.Label();
+            this.LoadingDirectoryLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -53,7 +54,7 @@
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
-            this.PathTextBox.TextChanged += new System.EventHandler(this.UpdateFileDictionary);
+            this.PathTextBox.Leave += new System.EventHandler(this.UpdateFileDictionary);
             // 
             // PathLabel
             // 
@@ -185,11 +186,22 @@
             this.ResultsFoundLabel.Text = "Results found: 0";
             this.ResultsFoundLabel.Visible = false;
             // 
+            // LoadingDirectoryLabel
+            // 
+            this.LoadingDirectoryLabel.AutoSize = true;
+            this.LoadingDirectoryLabel.Location = new System.Drawing.Point(905, 151);
+            this.LoadingDirectoryLabel.Name = "LoadingDirectoryLabel";
+            this.LoadingDirectoryLabel.Size = new System.Drawing.Size(110, 15);
+            this.LoadingDirectoryLabel.TabIndex = 12;
+            this.LoadingDirectoryLabel.Text = "Loading Directory...";
+            this.LoadingDirectoryLabel.Visible = false;
+            // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1027, 655);
+            this.Controls.Add(this.LoadingDirectoryLabel);
             this.Controls.Add(this.ResultsFoundLabel);
             this.Controls.Add(this.SearchingLabel);
             this.Controls.Add(this.IgnoreDirectoriesTextBox);
@@ -235,5 +247,6 @@
         private TextBox IgnoreDirectoriesTextBox;
         private Label SearchingLabel;
         private Label ResultsFoundLabel;
+        private Label LoadingDirectoryLabel;
     }
 }
