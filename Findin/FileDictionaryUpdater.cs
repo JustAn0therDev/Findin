@@ -7,10 +7,6 @@ namespace Findin
         public static Dictionary<string, StringBuilder> FileNamesToContent { get; } = new();
         private FileSystemWatcher Watcher { get; set; }
 
-        /// <summary>
-        /// Disposes an old FileSystemWatcher object and creates a new one to watch the path
-        /// </summary>
-        /// <param name="path">The path to watch for changes</param>
         public void Watch(string path, string fileTypes, string[] ignoredDirectories)
         {
             if (Watcher != null)
@@ -38,7 +34,7 @@ namespace Findin
 
             Watcher.IncludeSubdirectories = true;
             Watcher.EnableRaisingEvents = true;
-            
+
             Watcher.Changed += OnFileChanged;
             Watcher.Deleted += OnFileDeleted;
             Watcher.Created += OnFileCreated;

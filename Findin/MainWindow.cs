@@ -37,7 +37,11 @@ namespace Findin
                 return;
             }
 
-            if (!TextBoxHasValue(SearchTextBox) || string.IsNullOrEmpty(fileTypes) || fileTypes.Contains("*.*")) return;
+            if (!TextBoxHasValue(SearchTextBox) || 
+                string.IsNullOrEmpty(fileTypes) || 
+                fileTypes.Contains("*.*")       ||
+                LoadingDirectoryLabel.Visible) 
+                return;
 
             ShowResults(SearchTextBox.Text);
         }
@@ -250,12 +254,21 @@ namespace Findin
             }
         }
 
-        private void UpdateFileDictionary(object sender, EventArgs e)
+        private async void UpdateFileDictionary(object sender, EventArgs e)
         {
-            if (Directory.Exists(PathTextBox.Text))
+            try
             {
-                string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
-                Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
+                if (Directory.Exists(PathTextBox.Text))
+                {
+                    LoadingDirectoryLabel.Visible = true;
+                    
+                    string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
+                    await Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
+                }
+            }
+            finally
+            {
+                LoadingDirectoryLabel.Visible = false;
             }
         }
 
