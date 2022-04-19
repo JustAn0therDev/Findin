@@ -54,7 +54,7 @@
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
-            this.PathTextBox.Leave += new System.EventHandler(this.UpdateFileDictionary);
+            this.PathTextBox.TextChanged += new System.EventHandler(this.UpdateFileDictionary);
             // 
             // PathLabel
             // 
