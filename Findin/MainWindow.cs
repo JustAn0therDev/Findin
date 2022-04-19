@@ -8,6 +8,7 @@ namespace Findin
     public partial class MainWindowBackend : Form
     {
         private readonly FileDictionaryWrapper FileDictionaryWrapper = new();
+        private bool IsLoadingDirectory { get; set; }
 
         public MainWindowBackend()
         {
@@ -40,7 +41,7 @@ namespace Findin
             if (!TextBoxHasValue(SearchTextBox) || 
                 string.IsNullOrEmpty(fileTypes) || 
                 fileTypes.Contains("*.*")       ||
-                LoadingDirectoryLabel.Visible) 
+                IsLoadingDirectory) 
                 return;
 
             ShowResults(SearchTextBox.Text);
@@ -256,10 +257,12 @@ namespace Findin
 
         private async void UpdateFileDictionary(object sender, EventArgs e)
         {
+            if (IsLoadingDirectory) return;
             try
             {
                 if (Directory.Exists(PathTextBox.Text))
                 {
+                    IsLoadingDirectory = true;
                     LoadingDirectoryLabel.Visible = true;
                     
                     string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
@@ -268,6 +271,7 @@ namespace Findin
             }
             finally
             {
+                IsLoadingDirectory = false;
                 LoadingDirectoryLabel.Visible = false;
             }
         }
