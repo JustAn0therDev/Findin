@@ -4,8 +4,11 @@ namespace Findin
 {
     internal class FileDictionaryWrapper : IDisposable
     {
-        public static Dictionary<string, StringBuilder> FileNamesToContent { get; } = new();
+        public Dictionary<string, StringBuilder> FileNamesToContent { get; private set; } = new();
         private FileSystemWatcher Watcher { get; set; }
+        private string Path { get; set; }
+        private string FileTypes { get; set; }
+        private string[] IgnoredDirectories { get; set; }
 
         public void Watch(string path, string fileTypes, string[] ignoredDirectories)
         {
@@ -14,7 +17,11 @@ namespace Findin
 
             FileNamesToContent.Clear();
 
-            PopulateDictionary(path, fileTypes, ignoredDirectories);
+            Path = path;
+            FileTypes = fileTypes;
+            IgnoredDirectories = ignoredDirectories;
+
+            PopulateDictionary();
 
             Watcher = new(path);
 
@@ -22,9 +29,7 @@ namespace Findin
                                  | NotifyFilters.CreationTime
                                  | NotifyFilters.DirectoryName
                                  | NotifyFilters.FileName
-                                 | NotifyFilters.LastAccess
                                  | NotifyFilters.LastWrite
-                                 | NotifyFilters.Security
                                  | NotifyFilters.Size;
 
             foreach (var fileType in fileTypes.Split(';'))
@@ -33,24 +38,25 @@ namespace Findin
             }
 
             Watcher.IncludeSubdirectories = true;
-            Watcher.EnableRaisingEvents = true;
 
-            Watcher.Changed += OnFileChanged;
-            Watcher.Deleted += OnFileDeleted;
-            Watcher.Created += OnFileCreated;
-            Watcher.Renamed += OnFileRenamed;
+            Watcher.Changed += OnFileChange;
+            Watcher.Deleted += OnFileChange;
+            Watcher.Created += OnFileChange;
+            Watcher.Renamed += OnFileChange;
+            
+            Watcher.EnableRaisingEvents = true;
         }
 
-        private static void PopulateDictionary(string path, string fileTypes, string[] ignoredDirectories)
+        private void PopulateDictionary()
         {
-            string[] fileTypeArray = fileTypes.Split(';');
-            string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+            string[] fileTypeArray = FileTypes.Split(';');
+            string[] allFileNames = Directory.GetFiles(Path, "*.*", SearchOption.AllDirectories);
 
             foreach (var filePath in allFileNames)
             {
                 foreach (var fileType in fileTypeArray)
                 {
-                    if (filePath.EndsWith(fileType) && !InIgnoredDirectories(ignoredDirectories, filePath))
+                    if (filePath.EndsWith(fileType) && !InIgnoredDirectories(filePath))
                     {
                         FileNamesToContent.Add(filePath, new StringBuilder(File.ReadAllText(filePath)));
                     }
@@ -58,9 +64,9 @@ namespace Findin
             }
         }
 
-        public static bool InIgnoredDirectories(string[] directoriesToIgnore, string directory)
+        public bool InIgnoredDirectories(string directory)
         {
-            foreach (var dir in directoriesToIgnore)
+            foreach (var dir in IgnoredDirectories)
             {
                 foreach (var path in directory.Split('\\'))
                 {
@@ -74,31 +80,7 @@ namespace Findin
             return false;
         }
 
-        private static void OnFileChanged(object sender, FileSystemEventArgs fileSystemEvent)
-        {
-            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
-                FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
-        }
-
-        private static void OnFileDeleted(object sender, FileSystemEventArgs fileSystemEvent)
-        {
-            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
-                FileNamesToContent.Remove(fileSystemEvent.FullPath);
-        }
-
-        private static void OnFileCreated(object sender, FileSystemEventArgs fileSystemEvent)
-        {
-            FileNamesToContent.Add(fileSystemEvent.FullPath, new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath)));
-        }
-
-        private static void OnFileRenamed(object sender, RenamedEventArgs renamedEvent)
-        {
-            if (FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
-            {
-                FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
-                FileNamesToContent.Remove(renamedEvent.OldFullPath);
-            }
-        }
+        private void OnFileChange(object sender, FileSystemEventArgs fileSystemEvent) => Watch(Path, FileTypes, IgnoredDirectories);
 
         public void Dispose()
         {

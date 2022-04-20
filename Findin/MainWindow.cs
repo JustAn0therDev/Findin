@@ -99,16 +99,25 @@ namespace Findin
 
         private static string FixSearchPattern(string search)
         {
-            MatchCollection matches = Regex.Matches(search, @$"[^A-Za-z0-9_]+");
+            StringBuilder fixedPattern = new();
 
-            search = search.Replace(" ", @"\s");
-
-            foreach (Match match in matches)
+            for (int i = 0; i < search.Length; i++)
             {
-                search = search.Replace(match.Value, $@"\{match.Value}");
+                if (Regex.IsMatch(search[i].ToString(), $@"[^A-Za-z0-9_\s]+"))
+                {
+                    fixedPattern.Append($"\\{search[i]}");
+                }
+                else if (search[i] == ' ')
+                {
+                    fixedPattern.Append($@"\s");
+                }
+                else
+                {
+                    fixedPattern.Append(search[i]);
+                }
             }
 
-            return search;
+            return fixedPattern.ToString();
         }
 
         private static (int, string) ReadWholeLine(string input, int matchIndex)
