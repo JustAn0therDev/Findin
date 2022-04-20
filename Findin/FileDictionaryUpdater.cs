@@ -2,7 +2,7 @@
 
 namespace Findin
 {
-    internal class FileDictionaryWrapper : IDisposable
+    internal class FileDictionaryWrapper
     {
         public Dictionary<string, StringBuilder> FileNamesToContent { get; private set; } = new();
         private FileSystemWatcher Watcher { get; set; }
@@ -10,10 +10,17 @@ namespace Findin
         private string FileTypes { get; set; }
         private string[] IgnoredDirectories { get; set; }
 
+        ~FileDictionaryWrapper()
+        {
+            Watcher.Dispose();
+        }
+
         public void Watch(string path, string fileTypes, string[] ignoredDirectories)
         {
             if (Watcher != null)
+            {
                 Watcher.Dispose();
+            }
 
             FileNamesToContent.Clear();
 
@@ -81,10 +88,5 @@ namespace Findin
         }
 
         private void OnFileChange(object sender, FileSystemEventArgs fileSystemEvent) => Watch(Path, FileTypes, IgnoredDirectories);
-
-        public void Dispose()
-        {
-            Watcher.Dispose();
-        }
     }
 }

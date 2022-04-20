@@ -195,6 +195,8 @@ namespace Findin
                 IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
                 DefaultProgramPath = formState.DefaultProgramPath;
                 IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
+
+                UpdateFileDictionary(sender, e);
             }
         }
 
@@ -266,7 +268,7 @@ namespace Findin
 
         private async void UpdateFileDictionary(object sender, EventArgs e)
         {
-            if (IsLoadingDirectory) return;
+            if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) return;
 
             try
             {
