@@ -2,11 +2,15 @@
 
 A search tool to look for files by their content.
 
-I created this program because I use Visual Studio at my job and I do not like it's search since its very slow and time consuming. It gets worse as the projects get bigger and legacy projects don't even seem to yield results at all, even when searching for a file (not for content inside them).
+I created this program because I use Visual Studio at my job and I do not like it's "search in files" since its very slow and time consuming. It gets worse as the projects get bigger and legacy projects don't even seem to yield some results at all, even when searching for a file (not for content inside them).
 
-**This program aims for good performance and fast usage.**
+**This program aims for good performance and quick usage.**
 
 You can get started by downloading a release and reading the usage section below. Feel free to colaborate and/or change it as you see fit. Maybe something different "here and there" fits your workflow better than its current state.
+
+## How does it work?
+
+The program reads the directory from the Path field and loads it to a `Dictionary<string, StringBuilder>` (hash table) in memory. From there, it'll check the state of the file based on a `FileSystemWatcher`, allowing the content to stay fast to search while up-to-date.
 
 ## Usage
 
@@ -20,9 +24,9 @@ And to make sense of each field and button:
 - File types: The allowed file types to look for. You can put in a single extension like `cs` or any amount of extensions you want, separated by ";" like `cs;py;c;go`;
 - Ignore Directories: The name of directories you would like to ignore during the search. For example, a `node_modules` folder. You can ignore more than one directory like the file type filter: `bin;obj;wwwroot;node_modules`;
 - Search: The search pattern you want to look for. The checkbox right after it allows you to make a case-insentive search;
-- Set Default Program Path: The program you want to open up the files in. For example, if you found the match you were looking for, you can double-click the item listed in the white box and the file will be opened in it:
+- Set Default Program Path: The program you want to open the files in. For example, if you found the match you were looking for and set the path for _Visual Studio Code_ in your machine, you can double-click the item listed in the white box and the file will be opened in the editor:
 
-![A screenshot should a highlighted item in the ListBox result](DocsImages/DoubleClickToOpenInYourSetDefaultProgram.jpg)
+![A screenshot showing a highlighted item in the ListBox result](DocsImages/DoubleClickToOpenInYourSetDefaultProgram.jpg)
 
 - The big white box: Is a `ListBox` that shows a line preview of the matched content inside a file.
 
@@ -36,13 +40,20 @@ With all fields filled, the form would look something like this:
 
 When we click search (or press Enter while in the Search box):
 
-![A screenshot of the program searching for matches](DocsImages/Searching.jpg)
+![A screenshot with the program loading the select path/directory](DocsImages/LoadingDirectory.jpg)
 
-In the bottom left, we can see a `"Searching..."` text. This indicates that the program is still looking for files that could match the search pattern in it, **provided the search did not yield a number of matches greater then or equal to the match limit**.
+The _Loading Directory_ label shown in the right below the "Search" button indicates that the program is loading the contents of the selected path
+to a hash table in memory. This hash table is updated when a file is renamed, changed, deleted or a new file is created.
+
+**While the directory is loading, you cannot search for files. If you have a hard drive, seeing the _Loading Directory_ label after setting a path will be a bit more common compared to using an SSD.**
+
+When the program finishes loading the directory, you can now search for contents in files:
+
+![A screenshot of the program searching for matches](DocsImages/Searching.jpg)
 
 During the search, one of two things can happen: 
 
-The program will find too many matches and limit the top 50 (this match limit will be configurable in the future):
+The program will find too many matches and limit the top 250:
 
 ![A screenshot of the program showing the match limit](DocsImages/MatchLimit.jpg)
 
