@@ -10,11 +10,6 @@ namespace Findin
         private string FileTypes { get; set; }
         private string[] IgnoredDirectories { get; set; }
 
-        ~FileDictionaryWrapper()
-        {
-            Watcher.Dispose();
-        }
-
         public void Watch(string path, string fileTypes, string[] ignoredDirectories)
         {
             if (Watcher != null)
@@ -46,10 +41,10 @@ namespace Findin
 
             Watcher.IncludeSubdirectories = true;
 
-            Watcher.Changed += OnFileChange;
-            Watcher.Deleted += OnFileChange;
-            Watcher.Created += OnFileChange;
-            Watcher.Renamed += OnFileChange;
+            Watcher.Changed += OnFileChanged;
+            Watcher.Deleted += OnFileDeleted;
+            Watcher.Created += OnFileCreated;
+            Watcher.Renamed += OnFileRenamed;
             
             Watcher.EnableRaisingEvents = true;
         }
@@ -87,6 +82,34 @@ namespace Findin
             return false;
         }
 
-        private void OnFileChange(object sender, FileSystemEventArgs fileSystemEvent) => Watch(Path, FileTypes, IgnoredDirectories);
+        private void OnFileChanged(object sender, FileSystemEventArgs fileSystemEvent)
+        {
+            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+            {
+                FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
+            }
+        }
+
+        private void OnFileDeleted(object sender, FileSystemEventArgs fileSystemEvent)
+        {
+            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+            {
+                FileNamesToContent.Remove(fileSystemEvent.FullPath);
+            }
+        }
+
+        private void OnFileCreated(object sender, FileSystemEventArgs fileSystemEvent)
+        {
+            FileNamesToContent.Add(fileSystemEvent.FullPath, new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath)));
+        }
+
+        private void OnFileRenamed(object sender, RenamedEventArgs renamedEvent)
+        {
+            if (FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
+            {
+                FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
+                FileNamesToContent.Remove(renamedEvent.OldFullPath);
+            }
+        }
     }
 }
