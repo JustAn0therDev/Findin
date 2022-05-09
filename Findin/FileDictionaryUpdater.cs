@@ -140,7 +140,7 @@ namespace Findin
                 // before applying any changes.
                 if (renamedEvent.FullPath.EndsWith("TMP") && FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
                 {
-                    FileNamesToContent[renamedEvent.OldFullPath] = new StringBuilder(File.ReadAllText(renamedEvent.FullPath));
+                    FileNamesToContent[renamedEvent.OldFullPath] = new StringBuilder(File.ReadAllText(renamedEvent.OldFullPath));
                     return;
                 }
 
