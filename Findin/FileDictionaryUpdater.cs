@@ -84,31 +84,59 @@ namespace Findin
 
         private void OnFileChanged(object sender, FileSystemEventArgs fileSystemEvent)
         {
-            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+            try
             {
-                FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
+                if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+                {
+                    FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
+                }
+            }
+            catch (IOException)
+            {
+                // File is being used by another process.   
             }
         }
 
         private void OnFileDeleted(object sender, FileSystemEventArgs fileSystemEvent)
         {
-            if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+            try
             {
-                FileNamesToContent.Remove(fileSystemEvent.FullPath);
+                if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath))
+                {
+                    FileNamesToContent.Remove(fileSystemEvent.FullPath);
+                }
+            }
+            catch (IOException)
+            {
+                // File is being used by another process.
             }
         }
 
         private void OnFileCreated(object sender, FileSystemEventArgs fileSystemEvent)
         {
-            FileNamesToContent.Add(fileSystemEvent.FullPath, new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath)));
+            try
+            {
+                FileNamesToContent.Add(fileSystemEvent.FullPath, new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath)));
+            }
+            catch (IOException)
+            {
+                // File is being used by another process.
+            }
         }
 
         private void OnFileRenamed(object sender, RenamedEventArgs renamedEvent)
         {
-            if (FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
+            try
             {
-                FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
-                FileNamesToContent.Remove(renamedEvent.OldFullPath);
+                if (FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
+                {
+                    FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
+                    FileNamesToContent.Remove(renamedEvent.OldFullPath);
+                }
+            }
+            catch (IOException)
+            {
+                // File is being used by another process.
             }
         }
     }
