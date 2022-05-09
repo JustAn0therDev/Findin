@@ -57,6 +57,8 @@ namespace Findin
         {
             try
             {
+                Dictionary<string, List<int>> FileNameToLineNumber = new();
+
                 ResultsListBox.Items.Clear();
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
@@ -74,6 +76,8 @@ namespace Findin
                         break;
                     }
 
+                    FileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
+
                     string fileContent = keyValuePair.Value.ToString();
 
                     MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
@@ -82,9 +86,10 @@ namespace Findin
                     {
                         (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
 
-                        if (ResultsListBox.Items.Count < RESULT_LIMIT)
+                        if (ResultsListBox.Items.Count < RESULT_LIMIT && !FileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                         {
                             ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber}: \"{lineContent}\"");
+                            FileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                         }
                     }
                 }
