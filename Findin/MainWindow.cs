@@ -103,7 +103,8 @@ namespace Findin
 
             for (int i = 0; i < search.Length; i++)
             {
-                if (Regex.IsMatch(search[i].ToString(), $@"[^A-Za-z0-9_\s]+"))
+
+                if (Regex.IsMatch(search[i].ToString(), @"[^A-Za-z0-9_\s\u0000-\u024F]+"))
                 {
                     fixedPattern.Append($"\\{search[i]}");
                 }
