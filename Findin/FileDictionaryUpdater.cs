@@ -93,6 +93,7 @@ namespace Findin
         {
             try
             {
+                
                 if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath) && FileTypeIsInDesiredFileTypes(fileSystemEvent.FullPath))
                 {
                     FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
@@ -138,7 +139,7 @@ namespace Findin
             {
                 // @Important: This is a "Visual Studio-only" operation, since the IDE first renames the file to a ".TMP" file
                 // before applying any changes.
-                if (renamedEvent.FullPath.EndsWith("TMP") && FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
+                if (renamedEvent.FullPath.ToUpper().EndsWith("TMP") && FileNamesToContent.ContainsKey(renamedEvent.OldFullPath))
                 {
                     FileNamesToContent[renamedEvent.OldFullPath] = new StringBuilder(File.ReadAllText(renamedEvent.OldFullPath));
                     return;

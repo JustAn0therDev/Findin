@@ -21,6 +21,7 @@ namespace Findin
         private const int MAX_LINE_PREVIEW_SIZE = 120;
 
         private string DefaultProgramPath { get; set; }
+        private string LastSearchedPath { get; set; }
 
         public void Search(object sender, EventArgs e)
         {
@@ -43,6 +44,12 @@ namespace Findin
                 fileTypes.Contains("*.*")       ||
                 IsLoadingDirectory) 
                 return;
+
+            if (PathTextBox.Text != LastSearchedPath)
+            {
+                LastSearchedPath = PathTextBox.Text;
+                UpdateFileDictionary();
+            }
 
             ShowResults(SearchTextBox.Text);
         }
@@ -200,8 +207,9 @@ namespace Findin
                 IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
                 DefaultProgramPath = formState.DefaultProgramPath;
                 IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
+                LastSearchedPath = formState.Path;
 
-                UpdateFileDictionary(sender, e);
+                UpdateFileDictionary();
             }
         }
 
@@ -271,7 +279,7 @@ namespace Findin
             }
         }
 
-        private async void UpdateFileDictionary(object sender, EventArgs e)
+        private async void UpdateFileDictionary()
         {
             if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) return;
 
@@ -281,7 +289,7 @@ namespace Findin
                 {
                     IsLoadingDirectory = true;
                     LoadingDirectoryLabel.Visible = true;
-                    
+
                     string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
                     await Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
                 }

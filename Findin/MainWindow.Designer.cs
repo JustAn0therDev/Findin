@@ -54,7 +54,6 @@
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
-            this.PathTextBox.TextChanged += new System.EventHandler(this.UpdateFileDictionary);
             // 
             // PathLabel
             // 
@@ -107,7 +106,6 @@
             this.FileTypeTextBox.Name = "FileTypeTextBox";
             this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
             this.FileTypeTextBox.TabIndex = 2;
-            this.FileTypeTextBox.Leave += new System.EventHandler(this.UpdateFileDictionary);
             // 
             // IgnoreCaseCheckBox
             // 
@@ -164,7 +162,6 @@
             this.IgnoreDirectoriesTextBox.Name = "IgnoreDirectoriesTextBox";
             this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(307, 23);
             this.IgnoreDirectoriesTextBox.TabIndex = 3;
-            this.IgnoreDirectoriesTextBox.Leave += new System.EventHandler(this.UpdateFileDictionary);
             // 
             // SearchingLabel
             // 
