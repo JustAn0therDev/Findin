@@ -23,7 +23,7 @@ namespace Findin
         private string DefaultProgramPath { get; set; }
         private string LastSearchedPath { get; set; }
 
-        public void Search(object sender, EventArgs e)
+        public async void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FileTypeTextBox))
             {
@@ -39,16 +39,16 @@ namespace Findin
                 return;
             }
 
-            if (!TextBoxHasValue(SearchTextBox) || 
-                string.IsNullOrEmpty(fileTypes) || 
-                fileTypes.Contains("*.*")       ||
-                IsLoadingDirectory) 
+            if (!TextBoxHasValue(SearchTextBox) ||
+                string.IsNullOrEmpty(fileTypes) ||
+                fileTypes.Contains("*.*") ||
+                IsLoadingDirectory)
                 return;
 
             if (PathTextBox.Text != LastSearchedPath)
             {
                 LastSearchedPath = PathTextBox.Text;
-                UpdateFileDictionary();
+                await UpdateFileDictionary();
             }
 
             ShowResults(SearchTextBox.Text);
@@ -192,7 +192,7 @@ namespace Findin
 
         #region Events
 
-        private void OnFormLoad(object sender, EventArgs e)
+        private async void OnFormLoad(object sender, EventArgs e)
         {
             if (File.Exists(FormStateFileName))
             {
@@ -209,7 +209,7 @@ namespace Findin
                 IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
                 LastSearchedPath = formState.Path;
 
-                UpdateFileDictionary();
+                await UpdateFileDictionary();
             }
         }
 
@@ -279,7 +279,7 @@ namespace Findin
             }
         }
 
-        private async void UpdateFileDictionary()
+        private async Task UpdateFileDictionary()
         {
             if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) return;
 
