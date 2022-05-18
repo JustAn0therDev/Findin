@@ -45,7 +45,7 @@ When we click search (or press Enter while in the Search box):
 The _Loading Directory_ label shown in the right below the "Search" button indicates that the program is loading the contents of the selected path
 to a hash table in memory. This hash table is updated when a file is renamed, changed, deleted or a new file is created.
 
-**While the directory is loading, you cannot search for files. If you have a hard drive, seeing the _Loading Directory_ label after setting a path will be a bit more common compared to using an SSD.**
+**While the directory is loading, you cannot search for files. If you have an HDD, seeing the "_Loading Directory..._" label after setting a path will be a bit more common compared to using an SSD.**
 
 When the program finishes loading the directory, you can now search for contents in files:
 

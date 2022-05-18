@@ -17,8 +17,8 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const int RESULT_LIMIT = 250;
-        private const int MAX_LINE_PREVIEW_SIZE = 120;
+        private const int ResultLimit = 250;
+        private const int MaxLinePreviewSize = 120;
 
         private string DefaultProgramPath { get; set; }
         private string LastSearchedPath { get; set; }
@@ -45,6 +45,9 @@ namespace Findin
                 IsLoadingDirectory)
                 return;
 
+            if (!Directory.Exists(PathTextBox.Text))
+                return;
+            
             if (PathTextBox.Text != LastSearchedPath)
             {
                 LastSearchedPath = PathTextBox.Text;
@@ -64,13 +67,11 @@ namespace Findin
         {
             try
             {
-                Dictionary<string, List<int>> FileNameToLineNumber = new();
+                Dictionary<string, List<int>> fileNameToLineNumber = new();
 
                 ResultsListBox.Items.Clear();
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
-
-                List<string> directories = new() { Directory.GetCurrentDirectory() };
 
                 search = FixSearchPattern(search);
 
@@ -78,12 +79,12 @@ namespace Findin
 
                 foreach (KeyValuePair<string, StringBuilder> keyValuePair in FileDictionaryWrapper.FileNamesToContent)
                 {
-                    if (ResultsListBox.Items.Count == RESULT_LIMIT)
+                    if (ResultsListBox.Items.Count == ResultLimit)
                     {
                         break;
                     }
 
-                    FileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
+                    fileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
 
                     string fileContent = keyValuePair.Value.ToString();
 
@@ -93,10 +94,10 @@ namespace Findin
                     {
                         (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
 
-                        if (ResultsListBox.Items.Count < RESULT_LIMIT && !FileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
+                        if (ResultsListBox.Items.Count < ResultLimit && !fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                         {
-                            ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber}: \"{lineContent}\"");
-                            FileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
+                            ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber.ToString()}: \"{lineContent}\"");
+                            fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                         }
                     }
                 }
@@ -154,7 +155,7 @@ namespace Findin
             // Going forward
             while (forwardIndex < input.Length - 1)
             {
-                if (input[forwardIndex] == '\r' || charCountFromIndex == MAX_LINE_PREVIEW_SIZE)
+                if (input[forwardIndex] == '\r' || charCountFromIndex == MaxLinePreviewSize)
                 {
                     break;
                 }
@@ -181,13 +182,13 @@ namespace Findin
 
         private void SetResultsFoundLabelText()
         {
-            if (ResultsListBox.Items.Count == RESULT_LIMIT)
+            if (ResultsListBox.Items.Count == ResultLimit)
             {
-                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {RESULT_LIMIT} matches.";
+                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {ResultLimit} matches.";
                 return;
             }
 
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count);
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count.ToString());
         }
 
         #region Events
@@ -285,14 +286,14 @@ namespace Findin
 
             try
             {
-                if (Directory.Exists(PathTextBox.Text))
-                {
-                    IsLoadingDirectory = true;
-                    LoadingDirectoryLabel.Visible = true;
+                if (!Directory.Exists(LastSearchedPath))
+                    return;
+                
+                IsLoadingDirectory = true;
+                LoadingDirectoryLabel.Visible = true;
 
-                    string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
-                    await Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
-                }
+                string[] ignoredDirectoriesArray = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
+                await Task.Run(() => FileDictionaryWrapper.Watch(PathTextBox.Text, FileTypeTextBox.Text, ignoredDirectoriesArray));
             }
             finally
             {
