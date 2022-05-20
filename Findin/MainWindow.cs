@@ -21,10 +21,9 @@ namespace Findin
         private const int MaxLinePreviewSize = 120;
 
         private string DefaultProgramPath { get; set; }
-        private string LastSearchedPath { get; set; }
+        private string LastPath { get; set; }
         private string LastFileTypes { get; set; }
         private string LastIgnoredDirectories { get; set; }
-        private string LastSearch { get; set; }
 
         private async void Search(object sender, EventArgs e)
         {
@@ -51,15 +50,13 @@ namespace Findin
             if (!Directory.Exists(PathTextBox.Text))
                 return;
             
-            if (PathTextBox.Text != LastSearchedPath                    || 
-                FileTypeTextBox.Text != LastFileTypes                   || 
-                IgnoreDirectoriesTextBox.Text != LastIgnoredDirectories ||
-                SearchTextBox.Text != LastSearch)
+            if (PathTextBox.Text != LastPath  || 
+                FileTypeTextBox.Text != LastFileTypes || 
+                IgnoreDirectoriesTextBox.Text != LastIgnoredDirectories)
             {
-                LastSearchedPath = PathTextBox.Text;
+                LastPath = PathTextBox.Text;
                 LastFileTypes = FileTypeTextBox.Text;
                 LastIgnoredDirectories = IgnoreDirectoriesTextBox.Text;
-                LastSearch = SearchTextBox.Text;
                 await UpdateFileDictionary();
             }
 
@@ -103,11 +100,12 @@ namespace Findin
                     {
                         (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
 
-                        if (ResultsListBox.Items.Count < ResultLimit && !fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
-                        {
-                            ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber.ToString()}: \"{lineContent}\"");
-                            fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
-                        }
+                        if (ResultsListBox.Items.Count >= ResultLimit || 
+                            fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber)) 
+                            continue;
+                        
+                        ResultsListBox.Items.Add($"{keyValuePair.Key} at line {lineNumber.ToString()}: \"{lineContent}\"");
+                        fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                     }
                 }
             }
@@ -123,19 +121,19 @@ namespace Findin
         {
             StringBuilder fixedPattern = new();
 
-            for (int i = 0; i < search.Length; i++)
+            foreach (char character in search)
             {
-                if (Regex.IsMatch(search[i].ToString(), @"[^A-Za-z0-9_\s\u0000-\u024F]|[\W]+"))
+                if (Regex.IsMatch(character.ToString(), @"[^A-Za-z0-9_\s\u0000-\u024F]|[\W]+"))
                 {
-                    fixedPattern.Append($"\\{search[i]}");
+                    fixedPattern.Append($"\\{character}");
                 }
-                else if (search[i] == ' ')
+                else if (character == ' ')
                 {
                     fixedPattern.Append(@"\s");
                 }
                 else
                 {
-                    fixedPattern.Append(search[i]);
+                    fixedPattern.Append(character);
                 }
             }
 
@@ -221,10 +219,9 @@ namespace Findin
             DefaultProgramPath = formState.DefaultProgramPath;
             IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
             
-            LastSearchedPath = formState.Path;
+            LastPath = formState.Path;
             LastFileTypes = formState.FileTypes;
             LastIgnoredDirectories = formState.IgnoredDirectories;
-            LastSearch = formState.Search;
             
             await UpdateFileDictionary();
         }
@@ -299,9 +296,10 @@ namespace Findin
         {
             if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) 
                 return;
+            
             try
             {
-                if (!Directory.Exists(LastSearchedPath))
+                if (!Directory.Exists(LastPath))
                     return;
                 
                 IsLoadingDirectory = true;
