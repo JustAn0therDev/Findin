@@ -38,12 +38,14 @@ With all fields filled, the form would look something like this:
 
 **Important: when you close the program's window, it'll save the state in a file called `state.bin`. So do not worry about losing what you searched for after exiting the program.**
 
-When we click search (or press Enter while in the Search box):
+When we click search (or press Enter while in any text box):
 
 ![A screenshot with the program loading the select path/directory](DocsImages/LoadingDirectory.jpg)
 
 The _Loading Directory_ label shown in the right below the "Search" button indicates that the program is loading the contents of the selected path
 to a hash table in memory. This hash table is updated when a file is renamed, changed, deleted or a new file is created.
+
+_This "directory loading" is only re-done when one of the following fields are changed: "Path", "File types" or "Ignore Directories"._
 
 **While the directory is loading, you cannot search for files. If you have an HDD, seeing the "_Loading Directory..._" label after setting a path will be a bit more common compared to using an SSD.**
 
