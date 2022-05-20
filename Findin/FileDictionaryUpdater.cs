@@ -5,17 +5,14 @@ namespace Findin
     internal class FileDictionaryWrapper
     {
         public Dictionary<string, StringBuilder> FileNamesToContent { get; private set; } = new();
-        private FileSystemWatcher Watcher { get; set; }
+        private FileSystemWatcher? Watcher { get; set; }
         private string Path { get; set; }
         private string[] FileTypes { get; set; }
         private string[] IgnoredDirectories { get; set; }
 
         public void Watch(string path, string fileTypes, string[] ignoredDirectories)
         {
-            if (Watcher != null)
-            {
-                Watcher.Dispose();
-            }
+            Watcher?.Dispose();
 
             FileNamesToContent.Clear();
 
@@ -34,9 +31,9 @@ namespace Findin
                                  | NotifyFilters.LastWrite
                                  | NotifyFilters.Size;
 
-            foreach (var fileType in fileTypes.Split(';'))
+            foreach (string fileType in fileTypes.Split(';'))
             {
-                Watcher.Filters.Add("*." + fileType);
+                Watcher.Filters.Add(string.Concat("*.", fileType));
             }
 
             Watcher.IncludeSubdirectories = true;
@@ -53,7 +50,7 @@ namespace Findin
         {
             string[] allFileNames = Directory.GetFiles(Path, "*.*", SearchOption.AllDirectories);
 
-            foreach (var filePath in allFileNames)
+            foreach (string filePath in allFileNames)
             {
                 if (FileTypeIsInDesiredFileTypes(filePath) && !InIgnoredDirectories(filePath))
                 {
@@ -64,7 +61,7 @@ namespace Findin
 
         private bool FileTypeIsInDesiredFileTypes(string filePath)
         {
-            foreach (var fileType in FileTypes)
+            foreach (string fileType in FileTypes)
             {
                 if (filePath.EndsWith(fileType))
                     return true;
@@ -73,11 +70,11 @@ namespace Findin
             return false;
         }
 
-        public bool InIgnoredDirectories(string directory)
+        private bool InIgnoredDirectories(string directory)
         {
-            foreach (var dir in IgnoredDirectories)
+            foreach (string dir in IgnoredDirectories)
             {
-                foreach (var path in directory.Split('\\'))
+                foreach (string path in directory.Split('\\'))
                 {
                     if (path == dir)
                     {
@@ -93,7 +90,6 @@ namespace Findin
         {
             try
             {
-                
                 if (FileNamesToContent.ContainsKey(fileSystemEvent.FullPath) && FileTypeIsInDesiredFileTypes(fileSystemEvent.FullPath))
                 {
                     FileNamesToContent[fileSystemEvent.FullPath] = new StringBuilder(File.ReadAllText(fileSystemEvent.FullPath));
@@ -145,11 +141,11 @@ namespace Findin
                     return;
                 }
 
-                if (FileNamesToContent.ContainsKey(renamedEvent.OldFullPath) && FileTypeIsInDesiredFileTypes(renamedEvent.FullPath))
-                {
-                    FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
-                    FileNamesToContent.Remove(renamedEvent.OldFullPath);
-                }
+                if (!FileNamesToContent.ContainsKey(renamedEvent.OldFullPath) ||
+                    !FileTypeIsInDesiredFileTypes(renamedEvent.FullPath)) return;
+                
+                FileNamesToContent.Add(renamedEvent.FullPath, FileNamesToContent[renamedEvent.OldFullPath]);
+                FileNamesToContent.Remove(renamedEvent.OldFullPath);
             }
             catch (IOException)
             {

@@ -22,8 +22,11 @@ namespace Findin
 
         private string DefaultProgramPath { get; set; }
         private string LastSearchedPath { get; set; }
+        private string LastFileTypes { get; set; }
+        private string LastIgnoredDirectories { get; set; }
+        private string LastSearch { get; set; }
 
-        public async void Search(object sender, EventArgs e)
+        private async void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FileTypeTextBox))
             {
@@ -48,9 +51,15 @@ namespace Findin
             if (!Directory.Exists(PathTextBox.Text))
                 return;
             
-            if (PathTextBox.Text != LastSearchedPath)
+            if (PathTextBox.Text != LastSearchedPath                    || 
+                FileTypeTextBox.Text != LastFileTypes                   || 
+                IgnoreDirectoriesTextBox.Text != LastIgnoredDirectories ||
+                SearchTextBox.Text != LastSearch)
             {
                 LastSearchedPath = PathTextBox.Text;
+                LastFileTypes = FileTypeTextBox.Text;
+                LastIgnoredDirectories = IgnoreDirectoriesTextBox.Text;
+                LastSearch = SearchTextBox.Text;
                 await UpdateFileDictionary();
             }
 
@@ -177,14 +186,15 @@ namespace Findin
                 backwardIndex--;
             }
 
-            return (lineNumber, (string.Join("", backwardResult.ToString().Reverse()) + forwardResult.ToString()).Trim());
+            return (lineNumber, string.Concat(string.Join("", backwardResult.ToString().Reverse()), forwardResult).Trim());
         }
 
         private void SetResultsFoundLabelText()
         {
             if (ResultsListBox.Items.Count == ResultLimit)
             {
-                ResultsFoundLabel.Text = $"Matches reached limit. Showing top {ResultLimit} matches.";
+                ResultsFoundLabel.Text = string.Format("Matches reached limit. Showing top {0} matches.", 
+                    ResultLimit.ToString());
                 return;
             }
 
@@ -195,23 +205,28 @@ namespace Findin
 
         private async void OnFormLoad(object sender, EventArgs e)
         {
-            if (File.Exists(FormStateFileName))
-            {
-                using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
-                FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
+            if (!File.Exists(FormStateFileName))
+                return;
+            
+            await using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
+            FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
 
-                if (formState == null) return;
+            if (formState == null) 
+                return;
 
-                PathTextBox.Text = formState.Path;
-                FileTypeTextBox.Text = formState.FileTypes;
-                SearchTextBox.Text = formState.Search;
-                IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
-                DefaultProgramPath = formState.DefaultProgramPath;
-                IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
-                LastSearchedPath = formState.Path;
-
-                await UpdateFileDictionary();
-            }
+            PathTextBox.Text = formState.Path;
+            FileTypeTextBox.Text = formState.FileTypes;
+            SearchTextBox.Text = formState.Search;
+            IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
+            DefaultProgramPath = formState.DefaultProgramPath;
+            IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
+            
+            LastSearchedPath = formState.Path;
+            LastFileTypes = formState.FileTypes;
+            LastIgnoredDirectories = formState.IgnoredDirectories;
+            LastSearch = formState.Search;
+            
+            await UpdateFileDictionary();
         }
 
         private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -224,7 +239,7 @@ namespace Findin
 
         private void MainWindowBackend_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var formState = new FormState(
+            FormState formState = new(
                 PathTextBox.Text,
                 FileTypeTextBox.Text,
                 SearchTextBox.Text,
@@ -257,17 +272,17 @@ namespace Findin
 
             int itemIndex = ResultsListBox.IndexFromPoint(e.Location);
 
-            if (itemIndex != ListBox.NoMatches)
-            {
-                string? selectedFile = ResultsListBox.Items[itemIndex] as string;
+            if (itemIndex == ListBox.NoMatches)
+                return;
+            
+            string? selectedFile = ResultsListBox.Items[itemIndex] as string;
 
-                if (!string.IsNullOrEmpty(selectedFile))
-                {
-                    string fileName = selectedFile.Split(" at")[0];
+            if (string.IsNullOrEmpty(selectedFile))
+                return;
+            
+            string fileName = selectedFile.Split(" at")[0];
 
-                    Process.Start(DefaultProgramPath, $"\"{fileName}\"");
-                }
-            }
+            Process.Start(DefaultProgramPath, $"\"{fileName}\"");
         }
 
         private void SetDefaultProgramPathButton_Click(object sender, EventArgs e)
@@ -282,8 +297,8 @@ namespace Findin
 
         private async Task UpdateFileDictionary()
         {
-            if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) return;
-
+            if (IsLoadingDirectory || !TextBoxHasValue(FileTypeTextBox)) 
+                return;
             try
             {
                 if (!Directory.Exists(LastSearchedPath))
