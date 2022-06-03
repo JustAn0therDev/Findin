@@ -38,7 +38,6 @@
             this.SearchButton = new System.Windows.Forms.Button();
             this.PathFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.button1 = new System.Windows.Forms.Button();
-            this.SetDefaultProgramPathButton = new System.Windows.Forms.Button();
             this.DefaultProgramFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.IgnoreDirectoriesLabel = new System.Windows.Forms.Label();
             this.IgnoreDirectoriesTextBox = new System.Windows.Forms.TextBox();
@@ -128,16 +127,6 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.SelectFolderButton_Click);
             // 
-            // SetDefaultProgramPathButton
-            // 
-            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(1198, 143);
-            this.SetDefaultProgramPathButton.Name = "SetDefaultProgramPathButton";
-            this.SetDefaultProgramPathButton.Size = new System.Drawing.Size(319, 23);
-            this.SetDefaultProgramPathButton.TabIndex = 6;
-            this.SetDefaultProgramPathButton.Text = "Set Default Program Path";
-            this.SetDefaultProgramPathButton.UseVisualStyleBackColor = true;
-            this.SetDefaultProgramPathButton.Click += new System.EventHandler(this.SetDefaultProgramPathButton_Click);
-            // 
             // IgnoreDirectoriesLabel
             // 
             this.IgnoreDirectoriesLabel.AutoSize = true;
@@ -193,7 +182,6 @@
             this.Controls.Add(this.SearchingLabel);
             this.Controls.Add(this.IgnoreDirectoriesTextBox);
             this.Controls.Add(this.IgnoreDirectoriesLabel);
-            this.Controls.Add(this.SetDefaultProgramPathButton);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.IgnoreCaseCheckBox);
@@ -203,6 +191,7 @@
             this.Controls.Add(this.SearchTextBox);
             this.Controls.Add(this.PathLabel);
             this.Controls.Add(this.PathTextBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "MainWindowBackend";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -226,7 +215,6 @@
         private Button SearchButton;
         private FolderBrowserDialog PathFolderBrowser;
         private Button button1;
-        private Button SetDefaultProgramPathButton;
         private OpenFileDialog DefaultProgramFileDialog;
         private Label IgnoreDirectoriesLabel;
         private TextBox IgnoreDirectoriesTextBox;
