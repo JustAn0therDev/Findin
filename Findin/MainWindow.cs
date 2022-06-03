@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
@@ -17,8 +16,6 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const int ResultLimit = 250;
-        private const int MaxLinePreviewSize = 120;
         private const int MaxLineSize = 1000;
 
         private string DefaultProgramPath { get; set; }
@@ -57,10 +54,6 @@ namespace Findin
         private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
         // TODO: Update the README.md on how the search for files is done.
-        // TODO: Change the way the results are "created" in the ResultListBox.
-        // First, created the lines in parallel THEN populate the ResultListBox.
-        // The new Dictionary containing information about the lines found should be
-        // limited to {ResultLimit} results.
         private async Task Search(string search)
         {
             try
@@ -79,11 +72,6 @@ namespace Findin
 
                 foreach (KeyValuePair<string, string> keyValuePair in fileSearchResults)
                 {
-                    if (ResultListView.Items.Count == ResultLimit)
-                    {
-                        break;
-                    }
-
                     fileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
 
                     MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
@@ -94,9 +82,6 @@ namespace Findin
 
                         if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                             continue;
-
-                        if (ResultListView.Items.Count == ResultLimit)
-                            break;
 
                         ListViewItem item = new(keyValuePair.Key);
 
@@ -166,7 +151,7 @@ namespace Findin
             // Going forward
             while (forwardIndex < input.Length - 1)
             {
-                if (input[forwardIndex] == '\r' || charCountFromIndex is MaxLinePreviewSize or > MaxLineSize)
+                if (input[forwardIndex] == '\r' || charCountFromIndex == MaxLineSize)
                 {
                     break;
                 }
@@ -182,7 +167,7 @@ namespace Findin
             // Going backwards
             while (backwardIndex >= 0)
             {
-                if (input[backwardIndex] == '\n' || charCountFromIndex is MaxLinePreviewSize or > MaxLineSize)
+                if (input[backwardIndex] == '\n' || charCountFromIndex == MaxLineSize)
                 {
                     break;
                 }
@@ -214,12 +199,11 @@ namespace Findin
             string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
             string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
             
-            Parallel.ForEach(allFileNames, new ParallelOptions { MaxDegreeOfParallelism = ResultLimit }, filePath =>
+            Parallel.ForEach(allFileNames, filePath =>
             {
                 if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
                     InIgnoredDirectories(filePath, ignoredDirectories) ||
-                    string.IsNullOrEmpty(filePath)                     ||
-                    fileContents.Count >= ResultLimit)
+                    string.IsNullOrEmpty(filePath))
                     return;
 
                 string fileContent = File.ReadAllText(filePath);
@@ -268,8 +252,6 @@ namespace Findin
         {
             ResultListView.View = View.Details;
 
-            ResultListView.LabelEdit = true;
-
             ResultListView.FullRowSelect = true;
 
             ResultListView.GridLines = true;
@@ -278,7 +260,7 @@ namespace Findin
 
             ResultListView.Columns.Add("File", 400, HorizontalAlignment.Left);
             ResultListView.Columns.Add("Line", 100, HorizontalAlignment.Left);
-            ResultListView.Columns.Add("Match", 1000, HorizontalAlignment.Left);
+            ResultListView.Columns.Add("Match", 1200, HorizontalAlignment.Left);
 
             if (!File.Exists(FormStateFileName))
                 return;
@@ -328,31 +310,6 @@ namespace Findin
                 PathTextBox.Text = PathFolderBrowser.SelectedPath;
             }
         }
-
-        /*private void ResultListView_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (string.IsNullOrEmpty(DefaultProgramPath))
-            {
-                MessageBox.Show("You do not have a default program to open the file when clicking on a search result.\nIf you want to open the file in a program of your preference " +
-                    "you can do that by clicking the \"Set Default Program Path\" button and selecting a program!\nIt can be a text editor or an IDE.", "Warning!", MessageBoxButtons.OK);
-                return;
-            }
-
-            int itemIndex = ResultListView.SelectedItems[0];
-
-            if (itemIndex == ListBox.NoMatches)
-                return;
-            
-            string? selectedFile = ResultListView.Items[itemIndex] as string;
-
-            if (string.IsNullOrEmpty(selectedFile))
-                return;
-            
-            string fileName = selectedFile.Split(" at")[0];
-
-            Process.Start(DefaultProgramPath, $"\"{fileName}\"");
-        }
-        */
 
         private void SetDefaultProgramPathButton_Click(object sender, EventArgs e)
         {
