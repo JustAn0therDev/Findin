@@ -1,13 +1,14 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Findin
 {
+    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     public partial class MainWindowBackend : Form
     {
-        private readonly FileDictionaryWrapper FileDictionaryWrapper = new();
         private bool IsLoadingDirectory { get; set; }
 
         public MainWindowBackend()
@@ -57,10 +58,9 @@ namespace Findin
                 LastPath = PathTextBox.Text;
                 LastFileTypes = FileTypeTextBox.Text;
                 LastIgnoredDirectories = IgnoreDirectoriesTextBox.Text;
-                await UpdateFileDictionary();
             }
 
-            ShowResults(SearchTextBox.Text);
+            Search(SearchTextBox.Text);
         }
 
         private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
@@ -69,7 +69,7 @@ namespace Findin
 
         private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
-        private void ShowResults(string search)
+        private void Search(string search)
         {
             try
             {
@@ -83,7 +83,11 @@ namespace Findin
 
                 string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
 
-                foreach (KeyValuePair<string, StringBuilder> keyValuePair in FileDictionaryWrapper.FileNamesToContent)
+                List<string> fileSearchResults = GetFileNames(PathTextBox.Text);
+
+                Dictionary<string, StringBuilder> fileNamesToContent = new();
+
+                foreach (string fileName in fileSearchResults)
                 {
                     if (ResultsListBox.Items.Count == ResultLimit)
                     {
@@ -197,6 +201,52 @@ namespace Findin
             }
 
             ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count.ToString());
+        }
+        
+        private List<string> GetFileNames(string path)
+        {
+            List<string> fileNames = new();
+            string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+            string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
+            string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
+
+            foreach (string filePath in allFileNames)
+            {
+                if (FileTypeIsInDesiredFileTypes(filePath, fileTypes) && 
+                    !InIgnoredDirectories(filePath, ignoredDirectories))
+                {
+                    fileNames.Add(filePath);
+                }
+            }
+
+            return fileNames;
+        }
+        
+        private static bool FileTypeIsInDesiredFileTypes(string filePath, string[] fileTypes)
+        {
+            foreach (string fileType in fileTypes)
+            {
+                if (filePath.EndsWith(fileType))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool InIgnoredDirectories(string directory, string[] ignoredDirectories)
+        {
+            foreach (string dir in ignoredDirectories)
+            {
+                foreach (string path in directory.Split('\\'))
+                {
+                    if (path == dir)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         #region Events
