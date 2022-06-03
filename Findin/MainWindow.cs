@@ -47,7 +47,7 @@ namespace Findin
             if (!Directory.Exists(PathTextBox.Text))
                 return;
             
-            Search(SearchTextBox.Text);
+            await Search(SearchTextBox.Text);
         }
 
         private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
@@ -61,7 +61,7 @@ namespace Findin
         // First, created the lines in parallel THEN populate the ResultListBox.
         // The new Dictionary containing information about the lines found should be
         // limited to {ResultLimit} results.
-        private async void Search(string search)
+        private async Task Search(string search)
         {
             try
             {
@@ -75,9 +75,9 @@ namespace Findin
 
                 string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
 
-                ConcurrentDictionary<string, StringBuilder> fileSearchResults = await GetFileNames(PathTextBox.Text);
+                ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, regexSearchPattern);
 
-                foreach (KeyValuePair<string, StringBuilder> keyValuePair in fileSearchResults)
+                foreach (KeyValuePair<string, string> keyValuePair in fileSearchResults)
                 {
                     if (ResultsListBox.Items.Count == ResultLimit)
                     {
@@ -86,23 +86,19 @@ namespace Findin
 
                     fileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
 
-                    string fileContent = keyValuePair.Value.ToString();
-
-                    MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
+                    MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
 
                     foreach (Match match in matches)
                     {
-                        (int lineNumber, string lineContent) = ReadWholeLine(fileContent, match.Index);
+                        (int lineNumber, string lineContent) = ReadWholeLine(keyValuePair.Value, match.Index);
 
                         if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                             continue;
 
-                        if (ResultsListBox.Items.Count >= ResultLimit) 
+                        if (ResultsListBox.Items.Count == ResultLimit)
                             break;
-                        
-                        ResultsListBox.Items.Add(
-                            $"{keyValuePair.Key} at line {lineNumber.ToString()}: \"{lineContent}\""
-                            );
+
+                        ResultsListBox.Items.Add(string.Format("{0} at line {1}: {2}", keyValuePair.Key, lineNumber.ToString(), lineContent));
                         
                         fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                     }
@@ -153,8 +149,8 @@ namespace Findin
                 idx++;
             }
 
-            StringBuilder charsBeforeMatchIndex = new();
-            StringBuilder charsFromMatchIndexReversed = new();
+            StringBuilder charsBeforeMatchIndexReversed = new();
+            StringBuilder charsFromMatchIndex = new();
             int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
             int charCountFromIndex = 0;
 
@@ -166,7 +162,7 @@ namespace Findin
                     break;
                 }
 
-                charsFromMatchIndexReversed.Append(input[forwardIndex]);
+                charsFromMatchIndex.Append(input[forwardIndex]);
                 forwardIndex++;
                 charCountFromIndex++;
             }
@@ -182,49 +178,48 @@ namespace Findin
                     break;
                 }
 
-                charsBeforeMatchIndex.Append(input[backwardIndex]);
+                charsBeforeMatchIndexReversed.Append(input[backwardIndex]);
                 backwardIndex--;
                 charCountFromIndex++;
             }
 
-            StringBuilder charsFromMatchIndex = new();
+            StringBuilder charsBeforeMatchIndex = new();
 
-            for (int i = charsBeforeMatchIndex.Length - 1; i >= 0; i--)
+            for (int i = charsBeforeMatchIndexReversed.Length - 1; i >= 0; i--)
             {
-                charsFromMatchIndex.Append(charsBeforeMatchIndex[i]);
+                charsBeforeMatchIndex.Append(charsBeforeMatchIndexReversed[i]);
             }
 
-            return (lineNumber, string.Concat(charsFromMatchIndex.ToString(), charsFromMatchIndexReversed).Trim());
+            return (lineNumber, string.Concat(charsBeforeMatchIndex.ToString(), charsFromMatchIndex).TrimStart());
         }
 
         private void SetResultsFoundLabelText()
         {
-            if (ResultsListBox.Items.Count == ResultLimit)
-            {
-                ResultsFoundLabel.Text = string.Format("Matches reached limit. Showing top {0} matches.", 
-                    ResultLimit.ToString());
-                return;
-            }
-
             ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count.ToString());
         }
         
-        private Task<ConcurrentDictionary<string, StringBuilder>> GetFileNames(string path)
+        private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
         {
-            ConcurrentDictionary<string, StringBuilder> fileContents = new();
+            ConcurrentDictionary<string, string> fileContents = new();
             string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
             string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
-
-            Parallel.ForEach(allFileNames, filePath =>
+            
+            Parallel.ForEach(allFileNames, new ParallelOptions { MaxDegreeOfParallelism = ResultLimit }, filePath =>
             {
                 if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
-                    InIgnoredDirectories(filePath, ignoredDirectories))
+                    InIgnoredDirectories(filePath, ignoredDirectories) ||
+                    string.IsNullOrEmpty(filePath)                     ||
+                    fileContents.Count >= ResultLimit)
                     return;
 
-                if (!string.IsNullOrEmpty(filePath))
+                string fileContent = File.ReadAllText(filePath);
+                
+                bool hasMatch = Regex.IsMatch(fileContent, regexSearchPattern);
+
+                if (hasMatch)
                 {
-                    fileContents.TryAdd(filePath, new StringBuilder(File.ReadAllText(filePath)));
+                    fileContents.TryAdd(filePath, fileContent);
                 }
             });
 
