@@ -98,7 +98,9 @@ namespace Findin
                         if (ResultListView.Items.Count == ResultLimit)
                             break;
 
-                        ListViewItem item = new(string.Format("{0} at line {1}", keyValuePair.Key, lineNumber.ToString()));
+                        ListViewItem item = new(keyValuePair.Key);
+
+                        item.SubItems.Add(lineNumber.ToString());
 
                         item.SubItems.Add(lineContent);
 
@@ -272,11 +274,11 @@ namespace Findin
 
             ResultListView.GridLines = true;
 
-            // Sort the items in the list in ascending order.
             ResultListView.Sorting = SortOrder.Ascending;
 
-            ResultListView.Columns.Add("File", 500, HorizontalAlignment.Left);
-            ResultListView.Columns.Add("Line Content", 1000, HorizontalAlignment.Left);
+            ResultListView.Columns.Add("File", 400, HorizontalAlignment.Left);
+            ResultListView.Columns.Add("Line", 100, HorizontalAlignment.Left);
+            ResultListView.Columns.Add("Match", 1000, HorizontalAlignment.Left);
 
             if (!File.Exists(FormStateFileName))
                 return;
