@@ -32,7 +32,6 @@
             this.PathLabel = new System.Windows.Forms.Label();
             this.SearchTextBox = new System.Windows.Forms.TextBox();
             this.SearchLabel = new System.Windows.Forms.Label();
-            this.ResultsListBox = new System.Windows.Forms.ListBox();
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
             this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
@@ -45,11 +44,12 @@
             this.IgnoreDirectoriesTextBox = new System.Windows.Forms.TextBox();
             this.SearchingLabel = new System.Windows.Forms.Label();
             this.ResultsFoundLabel = new System.Windows.Forms.Label();
+            this.ResultListView = new System.Windows.Forms.ListView();
             this.SuspendLayout();
             // 
             // PathTextBox
             // 
-            this.PathTextBox.Location = new System.Drawing.Point(49, 12);
+            this.PathTextBox.Location = new System.Drawing.Point(49, 31);
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
@@ -58,7 +58,7 @@
             // PathLabel
             // 
             this.PathLabel.AutoSize = true;
-            this.PathLabel.Location = new System.Drawing.Point(12, 15);
+            this.PathLabel.Location = new System.Drawing.Point(12, 34);
             this.PathLabel.Name = "PathLabel";
             this.PathLabel.Size = new System.Drawing.Size(31, 15);
             this.PathLabel.TabIndex = 1;
@@ -66,7 +66,7 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(60, 114);
+            this.SearchTextBox.Location = new System.Drawing.Point(60, 140);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(365, 23);
             this.SearchTextBox.TabIndex = 4;
@@ -75,26 +75,16 @@
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 117);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 143);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(42, 15);
             this.SearchLabel.TabIndex = 5;
             this.SearchLabel.Text = "Search";
             // 
-            // ResultsListBox
-            // 
-            this.ResultsListBox.FormattingEnabled = true;
-            this.ResultsListBox.ItemHeight = 15;
-            this.ResultsListBox.Location = new System.Drawing.Point(12, 175);
-            this.ResultsListBox.Name = "ResultsListBox";
-            this.ResultsListBox.Size = new System.Drawing.Size(1003, 454);
-            this.ResultsListBox.TabIndex = 8;
-            this.ResultsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ResultsListBox_MouseDoubleClick);
-            // 
             // FileTypeLabel
             // 
             this.FileTypeLabel.AutoSize = true;
-            this.FileTypeLabel.Location = new System.Drawing.Point(12, 47);
+            this.FileTypeLabel.Location = new System.Drawing.Point(12, 72);
             this.FileTypeLabel.Name = "FileTypeLabel";
             this.FileTypeLabel.Size = new System.Drawing.Size(56, 15);
             this.FileTypeLabel.TabIndex = 8;
@@ -102,7 +92,7 @@
             // 
             // FileTypeTextBox
             // 
-            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 44);
+            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 69);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
             this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
             this.FileTypeTextBox.TabIndex = 2;
@@ -111,7 +101,7 @@
             // IgnoreCaseCheckBox
             // 
             this.IgnoreCaseCheckBox.AutoSize = true;
-            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(431, 116);
+            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(431, 142);
             this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
             this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
             this.IgnoreCaseCheckBox.TabIndex = 5;
@@ -120,7 +110,7 @@
             // 
             // SearchButton
             // 
-            this.SearchButton.Location = new System.Drawing.Point(660, 12);
+            this.SearchButton.Location = new System.Drawing.Point(1162, 11);
             this.SearchButton.Name = "SearchButton";
             this.SearchButton.Size = new System.Drawing.Size(355, 23);
             this.SearchButton.TabIndex = 7;
@@ -130,7 +120,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(431, 12);
+            this.button1.Location = new System.Drawing.Point(933, 11);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(223, 23);
             this.button1.TabIndex = 1;
@@ -140,7 +130,7 @@
             // 
             // SetDefaultProgramPathButton
             // 
-            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(12, 143);
+            this.SetDefaultProgramPathButton.Location = new System.Drawing.Point(1198, 143);
             this.SetDefaultProgramPathButton.Name = "SetDefaultProgramPathButton";
             this.SetDefaultProgramPathButton.Size = new System.Drawing.Size(319, 23);
             this.SetDefaultProgramPathButton.TabIndex = 6;
@@ -151,7 +141,7 @@
             // IgnoreDirectoriesLabel
             // 
             this.IgnoreDirectoriesLabel.AutoSize = true;
-            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 82);
+            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 107);
             this.IgnoreDirectoriesLabel.Name = "IgnoreDirectoriesLabel";
             this.IgnoreDirectoriesLabel.Size = new System.Drawing.Size(100, 15);
             this.IgnoreDirectoriesLabel.TabIndex = 5;
@@ -159,7 +149,7 @@
             // 
             // IgnoreDirectoriesTextBox
             // 
-            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 79);
+            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 104);
             this.IgnoreDirectoriesTextBox.Name = "IgnoreDirectoriesTextBox";
             this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(307, 23);
             this.IgnoreDirectoriesTextBox.TabIndex = 3;
@@ -185,11 +175,20 @@
             this.ResultsFoundLabel.Text = "Results found: 0";
             this.ResultsFoundLabel.Visible = false;
             // 
+            // ResultListView
+            // 
+            this.ResultListView.Location = new System.Drawing.Point(12, 172);
+            this.ResultListView.Name = "ResultListView";
+            this.ResultListView.Size = new System.Drawing.Size(1505, 457);
+            this.ResultListView.TabIndex = 11;
+            this.ResultListView.UseCompatibleStateImageBehavior = false;
+            // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1027, 655);
+            this.ClientSize = new System.Drawing.Size(1522, 655);
+            this.Controls.Add(this.ResultListView);
             this.Controls.Add(this.ResultsFoundLabel);
             this.Controls.Add(this.SearchingLabel);
             this.Controls.Add(this.IgnoreDirectoriesTextBox);
@@ -200,7 +199,6 @@
             this.Controls.Add(this.IgnoreCaseCheckBox);
             this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
-            this.Controls.Add(this.ResultsListBox);
             this.Controls.Add(this.SearchLabel);
             this.Controls.Add(this.SearchTextBox);
             this.Controls.Add(this.PathLabel);
@@ -222,7 +220,6 @@
         private Label PathLabel;
         private TextBox SearchTextBox;
         private Label SearchLabel;
-        private ListBox ResultsListBox;
         private Label FileTypeLabel;
         private TextBox FileTypeTextBox;
         private CheckBox IgnoreCaseCheckBox;
@@ -235,5 +232,6 @@
         private TextBox IgnoreDirectoriesTextBox;
         private Label SearchingLabel;
         private Label ResultsFoundLabel;
+        private ListView ResultListView;
     }
 }

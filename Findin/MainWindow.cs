@@ -18,7 +18,7 @@ namespace Findin
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
         private const int ResultLimit = 250;
-        private const int MaxLinePreviewSize = 80;
+        private const int MaxLinePreviewSize = 120;
         private const int MaxLineSize = 1000;
 
         private string DefaultProgramPath { get; set; }
@@ -67,7 +67,7 @@ namespace Findin
             {
                 Dictionary<string, List<int>> fileNameToLineNumber = new();
 
-                ResultsListBox.Items.Clear();
+                ResultListView.Items.Clear();
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
 
@@ -79,7 +79,7 @@ namespace Findin
 
                 foreach (KeyValuePair<string, string> keyValuePair in fileSearchResults)
                 {
-                    if (ResultsListBox.Items.Count == ResultLimit)
+                    if (ResultListView.Items.Count == ResultLimit)
                     {
                         break;
                     }
@@ -95,10 +95,14 @@ namespace Findin
                         if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                             continue;
 
-                        if (ResultsListBox.Items.Count == ResultLimit)
+                        if (ResultListView.Items.Count == ResultLimit)
                             break;
 
-                        ResultsListBox.Items.Add(string.Format("{0} at line {1}: {2}", keyValuePair.Key, lineNumber.ToString(), lineContent));
+                        ListViewItem item = new(string.Format("{0} at line {1}", keyValuePair.Key, lineNumber.ToString()));
+
+                        item.SubItems.Add(lineContent);
+
+                        ResultListView.Items.Add(item);
                         
                         fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                     }
@@ -109,6 +113,9 @@ namespace Findin
                 SearchingLabel.Visible = false;
                 SetResultsFoundLabelText();
                 ResultsFoundLabel.Visible = true;
+
+                ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
+                ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
             }
         }
 
@@ -195,7 +202,7 @@ namespace Findin
 
         private void SetResultsFoundLabelText()
         {
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultsListBox.Items.Count.ToString());
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
         }
         
         private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
@@ -257,6 +264,20 @@ namespace Findin
 
         private async void OnFormLoad(object sender, EventArgs e)
         {
+            ResultListView.View = View.Details;
+
+            ResultListView.LabelEdit = true;
+
+            ResultListView.FullRowSelect = true;
+
+            ResultListView.GridLines = true;
+
+            // Sort the items in the list in ascending order.
+            ResultListView.Sorting = SortOrder.Ascending;
+
+            ResultListView.Columns.Add("File", 500, HorizontalAlignment.Left);
+            ResultListView.Columns.Add("Line Content", 1000, HorizontalAlignment.Left);
+
             if (!File.Exists(FormStateFileName))
                 return;
             
@@ -306,7 +327,7 @@ namespace Findin
             }
         }
 
-        private void ResultsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        /*private void ResultListView_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (string.IsNullOrEmpty(DefaultProgramPath))
             {
@@ -315,12 +336,12 @@ namespace Findin
                 return;
             }
 
-            int itemIndex = ResultsListBox.IndexFromPoint(e.Location);
+            int itemIndex = ResultListView.SelectedItems[0];
 
             if (itemIndex == ListBox.NoMatches)
                 return;
             
-            string? selectedFile = ResultsListBox.Items[itemIndex] as string;
+            string? selectedFile = ResultListView.Items[itemIndex] as string;
 
             if (string.IsNullOrEmpty(selectedFile))
                 return;
@@ -329,6 +350,7 @@ namespace Findin
 
             Process.Start(DefaultProgramPath, $"\"{fileName}\"");
         }
+        */
 
         private void SetDefaultProgramPathButton_Click(object sender, EventArgs e)
         {
