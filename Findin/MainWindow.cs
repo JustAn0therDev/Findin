@@ -16,8 +16,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const int MaxLineSize = 1000;
-        private const int ThreadsToUse = 20;
+        private const int MaxLineSize = 250;
 
         private string DefaultProgramPath { get; set; }
 
@@ -65,38 +64,38 @@ namespace Findin
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
 
-                ConcurrentDictionary<string, List<int>> fileNameToLineNumber = new();
-
                 search = FixSearchPattern(search);
 
                 string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
 
                 ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, regexSearchPattern);
 
-                Parallel.ForEach(fileSearchResults, new ParallelOptions { MaxDegreeOfParallelism = ThreadsToUse }, keyValuePair =>
-                {
-                    fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
+                Parallel.ForEach(fileSearchResults, keyValuePair =>
+               {
+                   ConcurrentDictionary<string, List<int>> fileNameToLineNumber = new();
 
-                    MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
+                   fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
 
-                    foreach (Match match in matches)
-                    {
-                        (int lineNumber, string lineContent) = ReadWholeLine(keyValuePair.Value, match.Index);
+                   MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
 
-                        if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
-                            continue;
+                   Parallel.ForEach(matches, match =>
+                   {
+                       (int lineNumber, string lineContent) = ReadWholeLine(keyValuePair.Value, match.Index);
 
-                        ListViewItem item = new(keyValuePair.Key);
+                       if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
+                           return;
 
-                        item.SubItems.Add(lineNumber.ToString());
+                       ListViewItem item = new(keyValuePair.Key);
 
-                        item.SubItems.Add(lineContent);
+                       item.SubItems.Add(lineNumber.ToString());
 
-                        allListViewItemOccurrences.Add(item);
+                       item.SubItems.Add(lineContent);
 
-                        fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
-                    }
-                });
+                       allListViewItemOccurrences.Add(item);
+
+                       fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
+                   });
+               });
             }
             finally
             {
@@ -107,7 +106,7 @@ namespace Findin
 
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
-                
+
                 SearchingLabel.Visible = false;
                 SetResultsFoundLabelText();
                 ResultsFoundLabel.Visible = true;
@@ -142,91 +141,67 @@ namespace Findin
             int lineNumber = 1;
 
             int idx = 0;
+            int matchLineIndex = 0;
 
             while (idx != matchIndex)
             {
                 if (input[idx] == '\r')
+                {
                     lineNumber++;
+                    // + 2 to skip the "\r\n" chars
+                    matchLineIndex = idx + 2;
+                }
 
                 idx++;
             }
 
-            StringBuilder charsBeforeMatchIndexReversed = new();
-            StringBuilder charsFromMatchIndex = new();
-            int forwardIndex = matchIndex, backwardIndex = matchIndex - 1;
-            int charCountFromIndex = 0;
+            StringBuilder lineContent = new();
 
-            // Going forward
-            while (forwardIndex < input.Length - 1)
+            while (input[matchLineIndex] != '\n')
             {
-                if (input[forwardIndex] == '\r' || charCountFromIndex == MaxLineSize)
-                {
+                if (lineContent.Length == MaxLineSize || matchLineIndex == input.Length - 1)
                     break;
-                }
 
-                charsFromMatchIndex.Append(input[forwardIndex]);
-                forwardIndex++;
-                charCountFromIndex++;
+                lineContent.Append(input[matchLineIndex]);
+
+                matchLineIndex++;
             }
 
-            // Reset number of chars read so we can count backwards and don't exceed the char limit.
-            charCountFromIndex = 0;
-
-            // Going backwards
-            while (backwardIndex >= 0)
-            {
-                if (input[backwardIndex] == '\n' || charCountFromIndex == MaxLineSize)
-                {
-                    break;
-                }
-
-                charsBeforeMatchIndexReversed.Append(input[backwardIndex]);
-                backwardIndex--;
-                charCountFromIndex++;
-            }
-
-            StringBuilder charsBeforeMatchIndex = new();
-
-            for (int i = charsBeforeMatchIndexReversed.Length - 1; i >= 0; i--)
-            {
-                charsBeforeMatchIndex.Append(charsBeforeMatchIndexReversed[i]);
-            }
-
-            return (lineNumber, string.Concat(charsBeforeMatchIndex.ToString(), charsFromMatchIndex).TrimStart());
+            return (lineNumber, lineContent.ToString().TrimStart());
         }
 
         private void SetResultsFoundLabelText()
         {
             ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
         }
-        
+
         private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
         {
             ConcurrentDictionary<string, string> fileContents = new();
             string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
             string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
-            
-            Parallel.ForEach(allFileNames, new ParallelOptions { MaxDegreeOfParallelism = ThreadsToUse }, filePath =>
-            {
-                if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
-                    InIgnoredDirectories(filePath, ignoredDirectories) ||
-                    string.IsNullOrEmpty(filePath))
-                    return;
 
-                string fileContent = File.ReadAllText(filePath);
-                
-                bool hasMatch = Regex.IsMatch(fileContent, regexSearchPattern);
+            Parallel.ForEach(allFileNames, filePath =>
+           {
+               if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
+                   InIgnoredDirectories(filePath, ignoredDirectories) ||
+                   string.IsNullOrEmpty(filePath))
+                   return;
 
-                if (hasMatch && !fileContents.ContainsKey(filePath))
-                {
-                    fileContents.TryAdd(filePath, fileContent);
-                }
-            });
+               string fileContent = File.ReadAllText(filePath);
+
+               bool hasMatch = Regex.IsMatch(fileContent, regexSearchPattern);
+
+               if (hasMatch && !fileContents.ContainsKey(filePath))
+               {
+                   fileContents.TryAdd(filePath, fileContent);
+               }
+           });
 
             return Task.FromResult(fileContents);
         }
-        
+
         private static bool FileTypeIsInDesiredFileTypes(string filePath, string[] fileTypes)
         {
             foreach (string fileType in fileTypes)
@@ -272,11 +247,11 @@ namespace Findin
 
             if (!File.Exists(FormStateFileName))
                 return;
-            
+
             await using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
             FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
 
-            if (formState == null) 
+            if (formState == null)
                 return;
 
             PathTextBox.Text = formState.Path;

@@ -48,7 +48,7 @@
             // 
             // PathTextBox
             // 
-            this.PathTextBox.Location = new System.Drawing.Point(49, 31);
+            this.PathTextBox.Location = new System.Drawing.Point(49, 12);
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
@@ -57,7 +57,7 @@
             // PathLabel
             // 
             this.PathLabel.AutoSize = true;
-            this.PathLabel.Location = new System.Drawing.Point(12, 34);
+            this.PathLabel.Location = new System.Drawing.Point(12, 15);
             this.PathLabel.Name = "PathLabel";
             this.PathLabel.Size = new System.Drawing.Size(31, 15);
             this.PathLabel.TabIndex = 1;
@@ -65,7 +65,7 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(60, 140);
+            this.SearchTextBox.Location = new System.Drawing.Point(60, 109);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(365, 23);
             this.SearchTextBox.TabIndex = 4;
@@ -74,7 +74,7 @@
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 143);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 112);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(42, 15);
             this.SearchLabel.TabIndex = 5;
@@ -83,7 +83,7 @@
             // FileTypeLabel
             // 
             this.FileTypeLabel.AutoSize = true;
-            this.FileTypeLabel.Location = new System.Drawing.Point(12, 72);
+            this.FileTypeLabel.Location = new System.Drawing.Point(12, 48);
             this.FileTypeLabel.Name = "FileTypeLabel";
             this.FileTypeLabel.Size = new System.Drawing.Size(56, 15);
             this.FileTypeLabel.TabIndex = 8;
@@ -91,7 +91,7 @@
             // 
             // FileTypeTextBox
             // 
-            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 69);
+            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 45);
             this.FileTypeTextBox.Name = "FileTypeTextBox";
             this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
             this.FileTypeTextBox.TabIndex = 2;
@@ -100,7 +100,7 @@
             // IgnoreCaseCheckBox
             // 
             this.IgnoreCaseCheckBox.AutoSize = true;
-            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(431, 142);
+            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(431, 112);
             this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
             this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
             this.IgnoreCaseCheckBox.TabIndex = 5;
@@ -111,7 +111,7 @@
             // 
             this.SearchButton.Location = new System.Drawing.Point(1162, 11);
             this.SearchButton.Name = "SearchButton";
-            this.SearchButton.Size = new System.Drawing.Size(355, 23);
+            this.SearchButton.Size = new System.Drawing.Size(355, 35);
             this.SearchButton.TabIndex = 7;
             this.SearchButton.Text = "Search";
             this.SearchButton.UseVisualStyleBackColor = true;
@@ -119,7 +119,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(933, 11);
+            this.button1.Location = new System.Drawing.Point(431, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(223, 23);
             this.button1.TabIndex = 1;
@@ -130,7 +130,7 @@
             // IgnoreDirectoriesLabel
             // 
             this.IgnoreDirectoriesLabel.AutoSize = true;
-            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 107);
+            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 80);
             this.IgnoreDirectoriesLabel.Name = "IgnoreDirectoriesLabel";
             this.IgnoreDirectoriesLabel.Size = new System.Drawing.Size(100, 15);
             this.IgnoreDirectoriesLabel.TabIndex = 5;
@@ -138,7 +138,7 @@
             // 
             // IgnoreDirectoriesTextBox
             // 
-            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 104);
+            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 77);
             this.IgnoreDirectoriesTextBox.Name = "IgnoreDirectoriesTextBox";
             this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(307, 23);
             this.IgnoreDirectoriesTextBox.TabIndex = 3;
@@ -166,9 +166,9 @@
             // 
             // ResultListView
             // 
-            this.ResultListView.Location = new System.Drawing.Point(12, 172);
+            this.ResultListView.Location = new System.Drawing.Point(12, 138);
             this.ResultListView.Name = "ResultListView";
-            this.ResultListView.Size = new System.Drawing.Size(1505, 457);
+            this.ResultListView.Size = new System.Drawing.Size(1505, 491);
             this.ResultListView.TabIndex = 11;
             this.ResultListView.UseCompatibleStateImageBehavior = false;
             // 
