@@ -78,7 +78,7 @@ namespace Findin
 
                    MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
 
-                   Parallel.ForEach(matches, match =>
+                   foreach (Match match in matches)
                    {
                        (int lineNumber, string lineContent) = ReadWholeLine(keyValuePair.Value, match.Index);
 
@@ -94,7 +94,7 @@ namespace Findin
                        allListViewItemOccurrences.Add(item);
 
                        fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
-                   });
+                   }
                });
             }
             finally
@@ -176,10 +176,7 @@ namespace Findin
             return (lineNumber, lineContent.ToString().TrimStart());
         }
 
-        private void SetResultsFoundLabelText()
-        {
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
-        }
+        private void SetResultsFoundLabelText() => ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
 
         private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
         {
