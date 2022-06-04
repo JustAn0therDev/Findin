@@ -231,7 +231,7 @@ namespace Findin
         {
             foreach (string fileType in fileTypes)
             {
-                if (filePath.EndsWith(fileType))
+                if (Regex.IsMatch(filePath, $".\\.{fileType}$"))
                     return true;
             }
 
