@@ -17,6 +17,7 @@ namespace Findin
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
         private const int MaxLineSize = 1000;
+        private const int ThreadsToUse = 20;
 
         private string DefaultProgramPath { get; set; }
 
@@ -43,7 +44,7 @@ namespace Findin
 
             if (!Directory.Exists(PathTextBox.Text))
                 return;
-            
+
             await Search(SearchTextBox.Text);
         }
 
@@ -56,13 +57,15 @@ namespace Findin
         // TODO: Update the README.md on how the search for files is done.
         private async Task Search(string search)
         {
+            ConcurrentBag<ListViewItem> allListViewItemOccurrences = new();
+
             try
             {
-                Dictionary<string, List<int>> fileNameToLineNumber = new();
-
                 ResultListView.Items.Clear();
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
+
+                ConcurrentDictionary<string, List<int>> fileNameToLineNumber = new();
 
                 search = FixSearchPattern(search);
 
@@ -70,9 +73,9 @@ namespace Findin
 
                 ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, regexSearchPattern);
 
-                foreach (KeyValuePair<string, string> keyValuePair in fileSearchResults)
+                Parallel.ForEach(fileSearchResults, new ParallelOptions { MaxDegreeOfParallelism = ThreadsToUse }, keyValuePair =>
                 {
-                    fileNameToLineNumber.Add(keyValuePair.Key, new List<int>());
+                    fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
 
                     MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
 
@@ -89,20 +92,25 @@ namespace Findin
 
                         item.SubItems.Add(lineContent);
 
-                        ResultListView.Items.Add(item);
-                        
+                        allListViewItemOccurrences.Add(item);
+
                         fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                     }
-                }
+                });
             }
             finally
             {
-                SearchingLabel.Visible = false;
-                SetResultsFoundLabelText();
-                ResultsFoundLabel.Visible = true;
+                foreach (var item in allListViewItemOccurrences)
+                {
+                    ResultListView.Items.Add(item);
+                }
 
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
+                
+                SearchingLabel.Visible = false;
+                SetResultsFoundLabelText();
+                ResultsFoundLabel.Visible = true;
             }
         }
 
@@ -199,7 +207,7 @@ namespace Findin
             string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
             string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
             
-            Parallel.ForEach(allFileNames, filePath =>
+            Parallel.ForEach(allFileNames, new ParallelOptions { MaxDegreeOfParallelism = ThreadsToUse }, filePath =>
             {
                 if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
                     InIgnoredDirectories(filePath, ignoredDirectories) ||
@@ -210,7 +218,7 @@ namespace Findin
                 
                 bool hasMatch = Regex.IsMatch(fileContent, regexSearchPattern);
 
-                if (hasMatch)
+                if (hasMatch && !fileContents.ContainsKey(filePath))
                 {
                     fileContents.TryAdd(filePath, fileContent);
                 }
