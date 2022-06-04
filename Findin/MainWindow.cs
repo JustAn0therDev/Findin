@@ -157,10 +157,16 @@ namespace Findin
 
             StringBuilder lineContent = new();
 
-            while (input[matchLineIndex] != '\n')
+            while (input[matchLineIndex] != '\r')
             {
-                if (lineContent.Length == MaxLineSize || matchLineIndex == input.Length - 1)
+                if (lineContent.Length == MaxLineSize)
                     break;
+
+                if (matchLineIndex == input.Length - 1)
+                {
+                    lineContent.Append(input[matchLineIndex]);
+                    break;
+                }
 
                 lineContent.Append(input[matchLineIndex]);
 
