@@ -34,7 +34,6 @@
             this.SearchLabel = new System.Windows.Forms.Label();
             this.FileTypeLabel = new System.Windows.Forms.Label();
             this.FileTypeTextBox = new System.Windows.Forms.TextBox();
-            this.IgnoreCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.SearchButton = new System.Windows.Forms.Button();
             this.PathFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.button1 = new System.Windows.Forms.Button();
@@ -65,9 +64,9 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(60, 109);
+            this.SearchTextBox.Location = new System.Drawing.Point(95, 109);
             this.SearchTextBox.Name = "SearchTextBox";
-            this.SearchTextBox.Size = new System.Drawing.Size(365, 23);
+            this.SearchTextBox.Size = new System.Drawing.Size(330, 23);
             this.SearchTextBox.TabIndex = 4;
             this.SearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
@@ -76,9 +75,9 @@
             this.SearchLabel.AutoSize = true;
             this.SearchLabel.Location = new System.Drawing.Point(12, 112);
             this.SearchLabel.Name = "SearchLabel";
-            this.SearchLabel.Size = new System.Drawing.Size(42, 15);
+            this.SearchLabel.Size = new System.Drawing.Size(77, 15);
             this.SearchLabel.TabIndex = 5;
-            this.SearchLabel.Text = "Search";
+            this.SearchLabel.Text = "Regex Search";
             // 
             // FileTypeLabel
             // 
@@ -96,16 +95,6 @@
             this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
             this.FileTypeTextBox.TabIndex = 2;
             this.FileTypeTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
-            // 
-            // IgnoreCaseCheckBox
-            // 
-            this.IgnoreCaseCheckBox.AutoSize = true;
-            this.IgnoreCaseCheckBox.Location = new System.Drawing.Point(431, 112);
-            this.IgnoreCaseCheckBox.Name = "IgnoreCaseCheckBox";
-            this.IgnoreCaseCheckBox.Size = new System.Drawing.Size(88, 19);
-            this.IgnoreCaseCheckBox.TabIndex = 5;
-            this.IgnoreCaseCheckBox.Text = "Ignore Case";
-            this.IgnoreCaseCheckBox.UseVisualStyleBackColor = true;
             // 
             // SearchButton
             // 
@@ -184,7 +173,6 @@
             this.Controls.Add(this.IgnoreDirectoriesLabel);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
-            this.Controls.Add(this.IgnoreCaseCheckBox);
             this.Controls.Add(this.FileTypeTextBox);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.SearchLabel);
@@ -211,7 +199,6 @@
         private Label SearchLabel;
         private Label FileTypeLabel;
         private TextBox FileTypeTextBox;
-        private CheckBox IgnoreCaseCheckBox;
         private Button SearchButton;
         private FolderBrowserDialog PathFolderBrowser;
         private Button button1;
