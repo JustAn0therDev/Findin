@@ -73,7 +73,6 @@ namespace Findin
 
         private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
-        // TODO: Update the README.md on how the search for files is done.
         private async Task Search(string search)
         {
             ConcurrentBag<ListViewItem> allListViewItemOccurrences = new();
