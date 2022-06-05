@@ -92,13 +92,20 @@ namespace Findin
 
                 Parallel.ForEach(fileSearchResults, keyValuePair =>
                {
+                   ConcurrentDictionary<string, List<int>> fileNameToLineNumber = new();
+
+                   fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
+
                    MatchCollection matches = Regex.Matches(keyValuePair.Value, search);
 
                    foreach (Match match in matches)
                    {
                        if (!TryReadWholeLine(keyValuePair.Value, match.Index, out int lineNumber, out string lineContent))
                             break;
-                       
+
+                       if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
+                           continue;
+
                        ListViewItem item = new(keyValuePair.Key);
 
                        item.SubItems.Add(lineNumber.ToString());
@@ -106,6 +113,8 @@ namespace Findin
                        item.SubItems.Add(lineContent);
 
                        allListViewItemOccurrences.Add(item);
+
+                       fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
                    }
                });
             }
