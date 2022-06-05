@@ -24,7 +24,7 @@ To make sense of each field and button:
 
 - Ignore Directories: The directories you'd like to ignore during the search, like a `node_modules` directory. You can also ignore more than one directory: `bin;obj;wwwroot;node_modules`;
 
-- Regex Search: The search pattern you want to look for using `Regular Expressions`;
+- Regex Search: The search pattern you want to look for using a regular expression;
 
 - The big white box: Is a `ListView` that shows a table with the matches. It displays each line with three columns containing the path to the file, the line number and its content, respectively;
 
