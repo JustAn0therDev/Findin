@@ -16,7 +16,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
-        private const string RegexTestString = "TEST STRING";
+        private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
 
         private string DefaultProgramPath { get; set; }
@@ -36,15 +36,20 @@ namespace Findin
                 ShowEmptyFieldAlert(PathTextBox);
                 return;
             }
-            
+
+            if (!TextBoxHasValue(SearchTextBox))
+            {
+                ShowEmptyFieldAlert(SearchTextBox);
+                return;
+            }
+
             if (!RegexPatternIsValid(SearchTextBox.Text))
             {
                 MessageBox.Show("Please search for a valid Regex pattern.", "Warning");
                 return;
             }
 
-            if (!TextBoxHasValue(SearchTextBox) ||
-                string.IsNullOrEmpty(fileTypes) ||
+            if (string.IsNullOrEmpty(fileTypes) ||
                 fileTypes.Contains("*.*"))
                 return;
 
