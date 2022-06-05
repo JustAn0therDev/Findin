@@ -64,11 +64,7 @@ namespace Findin
                 ResultsFoundLabel.Visible = false;
                 SearchingLabel.Visible = true;
 
-                search = FixSearchPattern(search);
-
-                string regexSearchPattern = IgnoreCaseCheckBox.Checked ? $@"(?i){search}" : search;
-
-                ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, regexSearchPattern);
+                ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, search);
 
                 Parallel.ForEach(fileSearchResults, keyValuePair =>
                {
@@ -76,7 +72,7 @@ namespace Findin
 
                    fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
 
-                   MatchCollection matches = Regex.Matches(keyValuePair.Value, regexSearchPattern);
+                   MatchCollection matches = Regex.Matches(keyValuePair.Value, search);
 
                    foreach (Match match in matches)
                    {
@@ -111,29 +107,6 @@ namespace Findin
                 SetResultsFoundLabelText();
                 ResultsFoundLabel.Visible = true;
             }
-        }
-
-        private static string FixSearchPattern(string search)
-        {
-            StringBuilder fixedPattern = new();
-
-            foreach (char character in search)
-            {
-                if (Regex.IsMatch(character.ToString(), @"[^A-Za-z0-9_\s\u0000-\u024F]|[\W]+"))
-                {
-                    fixedPattern.Append($"\\{character}");
-                }
-                else if (character == ' ')
-                {
-                    fixedPattern.Append(@"\s");
-                }
-                else
-                {
-                    fixedPattern.Append(character);
-                }
-            }
-
-            return fixedPattern.ToString();
         }
 
         private static (int, string) ReadWholeLine(string input, int matchIndex)
@@ -260,7 +233,6 @@ namespace Findin
             PathTextBox.Text = formState.Path;
             FileTypeTextBox.Text = formState.FileTypes;
             SearchTextBox.Text = formState.Search;
-            IgnoreCaseCheckBox.Checked = formState.IgnoreCaseIsChecked;
             DefaultProgramPath = formState.DefaultProgramPath;
             IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
         }
@@ -279,7 +251,6 @@ namespace Findin
                 PathTextBox.Text,
                 FileTypeTextBox.Text,
                 SearchTextBox.Text,
-                IgnoreCaseCheckBox.Checked,
                 DefaultProgramPath,
                 IgnoreDirectoriesTextBox.Text);
 
