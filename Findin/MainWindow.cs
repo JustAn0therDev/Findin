@@ -16,6 +16,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
+        private const string RegexTestString = "TEST STRING";
         private const int MaxLineSize = 250;
 
         private string DefaultProgramPath { get; set; }
@@ -35,6 +36,12 @@ namespace Findin
                 ShowEmptyFieldAlert(PathTextBox);
                 return;
             }
+            
+            if (!RegexPatternIsValid(SearchTextBox.Text))
+            {
+                MessageBox.Show("Please search for a valid Regex pattern.", "Warning");
+                return;
+            }
 
             if (!TextBoxHasValue(SearchTextBox) ||
                 string.IsNullOrEmpty(fileTypes) ||
@@ -47,9 +54,22 @@ namespace Findin
             await Search(SearchTextBox.Text);
         }
 
+        private static bool RegexPatternIsValid(string pattern)
+        {
+            try
+            {
+                Regex.IsMatch(RegexTestString, pattern);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
 
-        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.");
+        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.", "Warning");
 
         private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
 
@@ -76,20 +96,21 @@ namespace Findin
 
                    foreach (Match match in matches)
                    {
-                       (int lineNumber, string lineContent) = ReadWholeLine(keyValuePair.Value, match.Index);
+                       if (TryReadWholeLine(keyValuePair.Value, match.Index, out int lineNumber, out string lineContent))
+                       {
+                           if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
+                               return;
 
-                       if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
-                           return;
+                           ListViewItem item = new(keyValuePair.Key);
 
-                       ListViewItem item = new(keyValuePair.Key);
+                           item.SubItems.Add(lineNumber.ToString());
 
-                       item.SubItems.Add(lineNumber.ToString());
+                           item.SubItems.Add(lineContent);
 
-                       item.SubItems.Add(lineContent);
+                           allListViewItemOccurrences.Add(item);
 
-                       allListViewItemOccurrences.Add(item);
-
-                       fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
+                           fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
+                       }
                    }
                });
             }
@@ -107,46 +128,6 @@ namespace Findin
                 SetResultsFoundLabelText();
                 ResultsFoundLabel.Visible = true;
             }
-        }
-
-        private static (int, string) ReadWholeLine(string input, int matchIndex)
-        {
-            int lineNumber = 1;
-
-            int idx = 0;
-            int matchLineIndex = 0;
-
-            while (idx != matchIndex)
-            {
-                if (input[idx] == '\r')
-                {
-                    lineNumber++;
-                    // + 2 to skip the "\r\n" chars
-                    matchLineIndex = idx + 2;
-                }
-
-                idx++;
-            }
-
-            StringBuilder lineContent = new();
-
-            while (input[matchLineIndex] != '\r')
-            {
-                if (lineContent.Length == MaxLineSize)
-                    break;
-
-                if (matchLineIndex == input.Length - 1)
-                {
-                    lineContent.Append(input[matchLineIndex]);
-                    break;
-                }
-
-                lineContent.Append(input[matchLineIndex]);
-
-                matchLineIndex++;
-            }
-
-            return (lineNumber, lineContent.ToString().TrimStart());
         }
 
         private void SetResultsFoundLabelText() => ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
@@ -203,6 +184,57 @@ namespace Findin
             }
 
             return false;
+        }
+
+        private static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
+        {
+            try
+            {
+                lineNumber = 1;
+
+                int idx = 0;
+                int matchLineIndex = 0;
+
+                while (idx != matchIndex)
+                {
+                    if (input[idx] == '\r')
+                    {
+                        lineNumber++;
+                        // + 2 to skip the "\r\n" chars
+                        matchLineIndex = idx + 2;
+                    }
+
+                    idx++;
+                }
+
+                StringBuilder lineContentStringBuilder = new();
+
+                while (input[matchLineIndex] != '\r')
+                {
+                    if (lineContentStringBuilder.Length == MaxLineSize)
+                        break;
+
+                    if (matchLineIndex == input.Length - 1)
+                    {
+                        lineContentStringBuilder.Append(input[matchLineIndex]);
+                        break;
+                    }
+
+                    lineContentStringBuilder.Append(input[matchLineIndex]);
+
+                    matchLineIndex++;
+                }
+
+                lineContent = lineContentStringBuilder.ToString().TrimStart();
+
+                return true;
+            }
+            catch
+            {
+                lineNumber = default;
+                lineContent = string.Empty;
+                return false;
+            }
         }
 
         #region Events
