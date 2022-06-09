@@ -33,7 +33,7 @@
             this.SearchTextBox = new System.Windows.Forms.TextBox();
             this.SearchLabel = new System.Windows.Forms.Label();
             this.FileTypeLabel = new System.Windows.Forms.Label();
-            this.FileTypeTextBox = new System.Windows.Forms.TextBox();
+            this.FilePatternsTextBox = new System.Windows.Forms.TextBox();
             this.SearchButton = new System.Windows.Forms.Button();
             this.PathFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.button1 = new System.Windows.Forms.Button();
@@ -47,7 +47,7 @@
             // 
             // PathTextBox
             // 
-            this.PathTextBox.Location = new System.Drawing.Point(49, 12);
+            this.PathTextBox.Location = new System.Drawing.Point(69, 18);
             this.PathTextBox.Name = "PathTextBox";
             this.PathTextBox.Size = new System.Drawing.Size(376, 23);
             this.PathTextBox.TabIndex = 0;
@@ -56,7 +56,7 @@
             // PathLabel
             // 
             this.PathLabel.AutoSize = true;
-            this.PathLabel.Location = new System.Drawing.Point(12, 15);
+            this.PathLabel.Location = new System.Drawing.Point(12, 21);
             this.PathLabel.Name = "PathLabel";
             this.PathLabel.Size = new System.Drawing.Size(31, 15);
             this.PathLabel.TabIndex = 1;
@@ -64,16 +64,16 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Location = new System.Drawing.Point(95, 109);
+            this.SearchTextBox.Location = new System.Drawing.Point(95, 120);
             this.SearchTextBox.Name = "SearchTextBox";
-            this.SearchTextBox.Size = new System.Drawing.Size(330, 23);
+            this.SearchTextBox.Size = new System.Drawing.Size(350, 23);
             this.SearchTextBox.TabIndex = 4;
             this.SearchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
             // SearchLabel
             // 
             this.SearchLabel.AutoSize = true;
-            this.SearchLabel.Location = new System.Drawing.Point(12, 112);
+            this.SearchLabel.Location = new System.Drawing.Point(12, 123);
             this.SearchLabel.Name = "SearchLabel";
             this.SearchLabel.Size = new System.Drawing.Size(77, 15);
             this.SearchLabel.TabIndex = 5;
@@ -82,19 +82,19 @@
             // FileTypeLabel
             // 
             this.FileTypeLabel.AutoSize = true;
-            this.FileTypeLabel.Location = new System.Drawing.Point(12, 48);
+            this.FileTypeLabel.Location = new System.Drawing.Point(12, 53);
             this.FileTypeLabel.Name = "FileTypeLabel";
-            this.FileTypeLabel.Size = new System.Drawing.Size(56, 15);
+            this.FileTypeLabel.Size = new System.Drawing.Size(71, 15);
             this.FileTypeLabel.TabIndex = 8;
-            this.FileTypeLabel.Text = "File types";
+            this.FileTypeLabel.Text = "File Patterns";
             // 
-            // FileTypeTextBox
+            // FilePatternsTextBox
             // 
-            this.FileTypeTextBox.Location = new System.Drawing.Point(74, 45);
-            this.FileTypeTextBox.Name = "FileTypeTextBox";
-            this.FileTypeTextBox.Size = new System.Drawing.Size(351, 23);
-            this.FileTypeTextBox.TabIndex = 2;
-            this.FileTypeTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
+            this.FilePatternsTextBox.Location = new System.Drawing.Point(94, 50);
+            this.FilePatternsTextBox.Name = "FilePatternsTextBox";
+            this.FilePatternsTextBox.Size = new System.Drawing.Size(351, 23);
+            this.FilePatternsTextBox.TabIndex = 2;
+            this.FilePatternsTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
             // SearchButton
             // 
@@ -108,7 +108,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(431, 12);
+            this.button1.Location = new System.Drawing.Point(451, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(223, 23);
             this.button1.TabIndex = 1;
@@ -119,7 +119,7 @@
             // IgnoreDirectoriesLabel
             // 
             this.IgnoreDirectoriesLabel.AutoSize = true;
-            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 80);
+            this.IgnoreDirectoriesLabel.Location = new System.Drawing.Point(12, 88);
             this.IgnoreDirectoriesLabel.Name = "IgnoreDirectoriesLabel";
             this.IgnoreDirectoriesLabel.Size = new System.Drawing.Size(100, 15);
             this.IgnoreDirectoriesLabel.TabIndex = 5;
@@ -127,9 +127,9 @@
             // 
             // IgnoreDirectoriesTextBox
             // 
-            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 77);
+            this.IgnoreDirectoriesTextBox.Location = new System.Drawing.Point(118, 85);
             this.IgnoreDirectoriesTextBox.Name = "IgnoreDirectoriesTextBox";
-            this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(307, 23);
+            this.IgnoreDirectoriesTextBox.Size = new System.Drawing.Size(327, 23);
             this.IgnoreDirectoriesTextBox.TabIndex = 3;
             this.IgnoreDirectoriesTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SearchTextBox_KeyPress);
             // 
@@ -155,9 +155,9 @@
             // 
             // ResultListView
             // 
-            this.ResultListView.Location = new System.Drawing.Point(12, 138);
+            this.ResultListView.Location = new System.Drawing.Point(12, 160);
             this.ResultListView.Name = "ResultListView";
-            this.ResultListView.Size = new System.Drawing.Size(1505, 491);
+            this.ResultListView.Size = new System.Drawing.Size(1505, 469);
             this.ResultListView.TabIndex = 11;
             this.ResultListView.UseCompatibleStateImageBehavior = false;
             // 
@@ -173,7 +173,7 @@
             this.Controls.Add(this.IgnoreDirectoriesLabel);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.SearchButton);
-            this.Controls.Add(this.FileTypeTextBox);
+            this.Controls.Add(this.FilePatternsTextBox);
             this.Controls.Add(this.FileTypeLabel);
             this.Controls.Add(this.SearchLabel);
             this.Controls.Add(this.SearchTextBox);
@@ -198,7 +198,7 @@
         private TextBox SearchTextBox;
         private Label SearchLabel;
         private Label FileTypeLabel;
-        private TextBox FileTypeTextBox;
+        private TextBox FilePatternsTextBox;
         private Button SearchButton;
         private FolderBrowserDialog PathFolderBrowser;
         private Button button1;

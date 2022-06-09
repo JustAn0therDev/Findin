@@ -16,20 +16,22 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Matches found: {0}";
+        private const string TooManyResultsFoundFormat = "Matches found: {0}. Showing top {1}.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
+        private const int MaxItemsInResultListView = 200;
 
         private string DefaultProgramPath { get; set; }
 
-        private async void Search(object sender, EventArgs e)
+        private void Search(object sender, EventArgs e)
         {
-            if (!TextBoxHasValue(FileTypeTextBox))
+            if (!TextBoxHasValue(FilePatternsTextBox))
             {
-                ShowEmptyFieldAlert(FileTypeTextBox);
+                ShowEmptyFieldAlert(FilePatternsTextBox);
                 return;
             }
 
-            string fileTypes = CleanSemiColonString(FileTypeTextBox.Text);
+            string filePatterns = CleanSemiColonString(FilePatternsTextBox.Text);
 
             if (!TextBoxHasValue(PathTextBox))
             {
@@ -49,14 +51,14 @@ namespace Findin
                 return;
             }
 
-            if (string.IsNullOrEmpty(fileTypes) ||
-                fileTypes.Contains("*.*"))
+            if (string.IsNullOrEmpty(filePatterns) ||
+                filePatterns.Contains("*.*"))
                 return;
 
             if (!Directory.Exists(PathTextBox.Text))
                 return;
 
-            await Search(SearchTextBox.Text);
+            Search(SearchTextBox.Text);
         }
 
         private static bool RegexPatternIsValid(string pattern)
@@ -76,18 +78,18 @@ namespace Findin
 
         private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.", "Warning");
 
-        private static string CleanSemiColonString(string fileTypes) => new Regex(";{2,}|;$").Replace(fileTypes, "");
+        private static string CleanSemiColonString(string str) => new Regex(";{2,}|;$").Replace(str, "");
 
-        private async Task Search(string search)
+        private async void Search(string search)
         {
+            ResultsFoundLabel.Visible = false;
+            SearchingLabel.Visible = true;
+            ResultListView.Items.Clear();
+
             ConcurrentBag<ListViewItem> allListViewItemOccurrences = new();
 
             try
             {
-                ResultListView.Items.Clear();
-                ResultsFoundLabel.Visible = false;
-                SearchingLabel.Visible = true;
-
                 ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, search);
 
                 Parallel.ForEach(fileSearchResults, keyValuePair =>
@@ -101,7 +103,7 @@ namespace Findin
                    foreach (Match match in matches)
                    {
                        if (!TryReadWholeLine(keyValuePair.Value, match.Index, out int lineNumber, out string lineContent))
-                            break;
+                           break;
 
                        if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
                            continue;
@@ -120,33 +122,50 @@ namespace Findin
             }
             finally
             {
+                int numberOfOccurrencesFound = 0;
+
                 foreach (ListViewItem item in allListViewItemOccurrences)
                 {
+                    if (numberOfOccurrencesFound == MaxItemsInResultListView)
+                        break;
+
                     ResultListView.Items.Add(item);
+                    numberOfOccurrencesFound++;
                 }
 
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
-                SetResultsFoundLabelText();
+                SetResultsFoundLabelText(allListViewItemOccurrences.Count);
                 ResultsFoundLabel.Visible = true;
             }
         }
 
-        private void SetResultsFoundLabelText() => ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
+        private void SetResultsFoundLabelText(int totalRecordsFound)
+        {
+            if (totalRecordsFound > MaxItemsInResultListView)
+                ResultsFoundLabel.Text = string.Format(TooManyResultsFoundFormat, totalRecordsFound.ToString(), MaxItemsInResultListView.ToString());
+            else
+                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalRecordsFound.ToString());
+        }
 
         private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
         {
             ConcurrentDictionary<string, string> fileContents = new();
-            string[] allFileNames = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
-            string[] fileTypes = CleanSemiColonString(FileTypeTextBox.Text).Split(';');
+            string[] filePatterns = CleanSemiColonString(FilePatternsTextBox.Text).Split(';');
+            
+            List<string> allFileNames = new();
+
+            foreach (string pattern in filePatterns)
+            {
+                allFileNames.AddRange(Directory.GetFiles(path, pattern, SearchOption.AllDirectories));
+            }
 
             Parallel.ForEach(allFileNames, filePath =>
-           {
-               if (!FileTypeIsInDesiredFileTypes(filePath, fileTypes) ||
-                   InIgnoredDirectories(filePath, ignoredDirectories) ||
+            {
+               if (InIgnoredDirectories(filePath, ignoredDirectories) ||
                    string.IsNullOrEmpty(filePath))
                    return;
 
@@ -161,17 +180,6 @@ namespace Findin
            });
 
             return Task.FromResult(fileContents);
-        }
-
-        private static bool FileTypeIsInDesiredFileTypes(string filePath, string[] fileTypes)
-        {
-            foreach (string fileType in fileTypes)
-            {
-                if (Regex.IsMatch(filePath, $".\\.{fileType}$"))
-                    return true;
-            }
-
-            return false;
         }
 
         private static bool InIgnoredDirectories(string directory, string[] ignoredDirectories)
@@ -267,7 +275,7 @@ namespace Findin
                 return;
 
             PathTextBox.Text = formState.Path;
-            FileTypeTextBox.Text = formState.FileTypes;
+            FilePatternsTextBox.Text = formState.FilePatterns;
             SearchTextBox.Text = formState.Search;
             DefaultProgramPath = formState.DefaultProgramPath;
             IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
@@ -285,7 +293,7 @@ namespace Findin
         {
             FormState formState = new(
                 PathTextBox.Text,
-                FileTypeTextBox.Text,
+                FilePatternsTextBox.Text,
                 SearchTextBox.Text,
                 DefaultProgramPath,
                 IgnoreDirectoriesTextBox.Text);

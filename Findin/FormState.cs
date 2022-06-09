@@ -2,7 +2,7 @@
 {
     internal record FormState(
         string Path, 
-        string FileTypes, 
+        string FilePatterns, 
         string Search, 
         string DefaultProgramPath,
         string IgnoredDirectories);
