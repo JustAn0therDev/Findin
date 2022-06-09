@@ -145,17 +145,22 @@ namespace Findin
         private void SetResultsFoundLabelText(int totalRecordsFound)
         {
             if (totalRecordsFound > MaxItemsInResultListView)
+            {
                 ResultsFoundLabel.Text = string.Format(TooManyResultsFoundFormat, totalRecordsFound.ToString(), MaxItemsInResultListView.ToString());
-            else
-                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalRecordsFound.ToString());
+                return;
+            }
+                
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalRecordsFound.ToString());
         }
 
         private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
         {
             ConcurrentDictionary<string, string> fileContents = new();
-            string[] ignoredDirectories = CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';');
+            
             string[] filePatterns = CleanSemiColonString(FilePatternsTextBox.Text).Split(';');
             
+            string ignoredDirectories = string.Join("|", CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';'));
+
             List<string> allFileNames = new();
 
             foreach (string pattern in filePatterns)
@@ -165,7 +170,7 @@ namespace Findin
 
             Parallel.ForEach(allFileNames, filePath =>
             {
-               if (InIgnoredDirectories(filePath, ignoredDirectories) ||
+               if (Regex.IsMatch(filePath, $"\\\\{ignoredDirectories}\\\\") ||
                    string.IsNullOrEmpty(filePath))
                    return;
 
@@ -180,22 +185,6 @@ namespace Findin
            });
 
             return Task.FromResult(fileContents);
-        }
-
-        private static bool InIgnoredDirectories(string directory, string[] ignoredDirectories)
-        {
-            foreach (string dir in ignoredDirectories)
-            {
-                foreach (string path in directory.Split('\\'))
-                {
-                    if (path == dir)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
@@ -258,8 +247,6 @@ namespace Findin
             ResultListView.FullRowSelect = true;
 
             ResultListView.GridLines = true;
-
-            ResultListView.Sorting = SortOrder.Ascending;
 
             ResultListView.Columns.Add("File", 400, HorizontalAlignment.Left);
             ResultListView.Columns.Add("Line", 100, HorizontalAlignment.Left);
