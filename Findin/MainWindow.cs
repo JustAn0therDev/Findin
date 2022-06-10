@@ -14,8 +14,7 @@ namespace Findin
         }
 
         private const string FormStateFileName = "state.bin";
-        private const string ResultsFoundFormat = "Matches found: {0}";
-        private const string TooManyResultsFoundFormat = "Matches found: {0}. Showing top {1}.";
+        private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 200;
@@ -115,7 +114,7 @@ namespace Findin
                             break;
 
                         if (fileNameToLineNumber[file.Key].Contains(lineNumber))
-                            break;
+                            continue;
 
                         ListViewItem item = new(file.Key);
 
@@ -140,18 +139,8 @@ namespace Findin
             }
         }
 
-        private void SetResultsFoundLabelText(int occurrences)
-        {
-            if (occurrences > MaxItemsInResultListView)
-            {
-                ResultsFoundLabel.Text = string.Format(TooManyResultsFoundFormat,
-                    occurrences.ToString(),
-                    MaxItemsInResultListView.ToString());
-                return;
-            }
-
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
-        }
+        private void SetResultsFoundLabelText(int occurrences) 
+            => ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, occurrences, ResultListView.Items.Count.ToString());
 
         private (Dictionary<string, FileOccurrence>, int) GetFileContents(string path, string regexSearchPattern)
         {
@@ -181,7 +170,7 @@ namespace Findin
 
                 totalOccurrences += matches.Count;
 
-                if (matches.Count > 0 && fileContents.Count < MaxItemsInResultListView)
+                if (matches.Count > 0)
                 {
                     List<int> indexes = new();
 
