@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
@@ -20,6 +19,7 @@ namespace Findin
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 200;
+        private const int NumberOfBreakLineCharsToSkip = 2;
 
         private string DefaultProgramPath { get; set; }
 
@@ -65,7 +65,7 @@ namespace Findin
         {
             try
             {
-                Regex.IsMatch(RegexTestString, pattern);
+                bool _ = Regex.IsMatch(RegexTestString, pattern);
                 return true;
             }
             catch
@@ -80,85 +80,85 @@ namespace Findin
 
         private static string CleanSemiColonString(string str) => new Regex(";{2,}|;$").Replace(str, "");
 
-        private async void Search(string search)
+        private void Search(string search)
         {
             ResultsFoundLabel.Visible = false;
             SearchingLabel.Visible = true;
             ResultListView.Items.Clear();
 
-            ConcurrentBag<ListViewItem> allListViewItemOccurrences = new();
+            int totalOccurrences = 0;
+
+            bool reachedLimit = false;
 
             try
             {
-                ConcurrentDictionary<string, string> fileSearchResults = await GetFileContents(PathTextBox.Text, search);
+                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = GetFileContents(PathTextBox.Text, search);
 
-                Parallel.ForEach(fileSearchResults, keyValuePair =>
-               {
-                   ConcurrentDictionary<string, List<int>> fileNameToLineNumber = new();
+                foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
+                {
+                    if (reachedLimit)
+                        break;
 
-                   fileNameToLineNumber.TryAdd(keyValuePair.Key, new List<int>());
+                    Dictionary<string, List<int>> fileNameToLineNumber = new();
 
-                   MatchCollection matches = Regex.Matches(keyValuePair.Value, search);
+                    fileNameToLineNumber.TryAdd(file.Key, new List<int>());
 
-                   foreach (Match match in matches)
-                   {
-                       if (!TryReadWholeLine(keyValuePair.Value, match.Index, out int lineNumber, out string lineContent))
-                           break;
+                    foreach (int idx in file.Value.MatchIndexes)
+                    {
+                        if (ResultListView.Items.Count == MaxItemsInResultListView)
+                        {
+                            reachedLimit = true;
+                            break;
+                        }
 
-                       if (fileNameToLineNumber[keyValuePair.Key].Contains(lineNumber))
-                           continue;
+                        if (!TryReadWholeLine(file.Value.FileContent, idx, out int lineNumber, out string lineContent))
+                            break;
 
-                       ListViewItem item = new(keyValuePair.Key);
+                        if (fileNameToLineNumber[file.Key].Contains(lineNumber))
+                            break;
 
-                       item.SubItems.Add(lineNumber.ToString());
+                        ListViewItem item = new(file.Key);
 
-                       item.SubItems.Add(lineContent);
+                        item.SubItems.Add(lineNumber.ToString());
 
-                       allListViewItemOccurrences.Add(item);
+                        item.SubItems.Add(lineContent);
 
-                       fileNameToLineNumber[keyValuePair.Key].Add(lineNumber);
-                   }
-               });
+                        ResultListView.Items.Add(item);
+
+                        fileNameToLineNumber[file.Key].Add(lineNumber);
+                    }
+                }
             }
             finally
             {
-                int numberOfOccurrencesFound = 0;
-
-                foreach (ListViewItem item in allListViewItemOccurrences)
-                {
-                    if (numberOfOccurrencesFound == MaxItemsInResultListView)
-                        break;
-
-                    ResultListView.Items.Add(item);
-                    numberOfOccurrencesFound++;
-                }
-
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
-                SetResultsFoundLabelText(allListViewItemOccurrences.Count);
+                SetResultsFoundLabelText(totalOccurrences);
                 ResultsFoundLabel.Visible = true;
             }
         }
 
-        private void SetResultsFoundLabelText(int totalRecordsFound)
+        private void SetResultsFoundLabelText(int occurrences)
         {
-            if (totalRecordsFound > MaxItemsInResultListView)
+            if (occurrences > MaxItemsInResultListView)
             {
-                ResultsFoundLabel.Text = string.Format(TooManyResultsFoundFormat, totalRecordsFound.ToString(), MaxItemsInResultListView.ToString());
+                ResultsFoundLabel.Text = string.Format(TooManyResultsFoundFormat,
+                    occurrences.ToString(),
+                    MaxItemsInResultListView.ToString());
                 return;
             }
-                
-            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalRecordsFound.ToString());
+
+            ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, ResultListView.Items.Count.ToString());
         }
 
-        private Task<ConcurrentDictionary<string, string>> GetFileContents(string path, string regexSearchPattern)
+        private (Dictionary<string, FileOccurrence>, int) GetFileContents(string path, string regexSearchPattern)
         {
-            ConcurrentDictionary<string, string> fileContents = new();
-            
+            Dictionary<string, FileOccurrence> fileContents = new();
+
             string[] filePatterns = CleanSemiColonString(FilePatternsTextBox.Text).Split(';');
-            
+
             string ignoredDirectories = string.Join("|", CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';'));
 
             List<string> allFileNames = new();
@@ -168,23 +168,33 @@ namespace Findin
                 allFileNames.AddRange(Directory.GetFiles(path, pattern, SearchOption.AllDirectories));
             }
 
-            Parallel.ForEach(allFileNames, filePath =>
+            int totalOccurrences = 0;
+
+            foreach (string filePath in allFileNames)
             {
-               if (Regex.IsMatch(filePath, $"\\\\{ignoredDirectories}\\\\") ||
-                   string.IsNullOrEmpty(filePath))
-                   return;
+                if (Regex.IsMatch(filePath, $"\\\\{ignoredDirectories}\\\\") || string.IsNullOrEmpty(filePath))
+                    continue;
 
-               string fileContent = File.ReadAllText(filePath);
+                string fileContent = File.ReadAllText(filePath);
 
-               bool hasMatch = Regex.IsMatch(fileContent, regexSearchPattern);
+                MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
-               if (hasMatch && !fileContents.ContainsKey(filePath))
-               {
-                   fileContents.TryAdd(filePath, fileContent);
-               }
-           });
+                totalOccurrences += matches.Count;
 
-            return Task.FromResult(fileContents);
+                if (matches.Count > 0 && fileContents.Count < MaxItemsInResultListView)
+                {
+                    List<int> indexes = new();
+
+                    foreach (Match match in matches)
+                    {
+                        indexes.Add(match.Index);
+                    }
+
+                    fileContents.Add(filePath, new FileOccurrence(fileContent, indexes));
+                }
+            }
+
+            return (fileContents, totalOccurrences);
         }
 
         private static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
@@ -201,8 +211,7 @@ namespace Findin
                     if (input[idx] == '\r')
                     {
                         lineNumber++;
-                        // + 2 to skip the "\r\n" chars
-                        matchLineIndex = idx + 2;
+                        matchLineIndex = idx + NumberOfBreakLineCharsToSkip;
                     }
 
                     idx++;
