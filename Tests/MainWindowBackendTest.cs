@@ -72,8 +72,7 @@ namespace Tests
         [TestCase("C:\\Users\\something\\file.cs", "something")]
         [TestCase("C:\\Users\\something\\repos\\js\\index.js", "repos|things")]
         [TestCase("C:\\Users\\something\\repos\\bin\\my_project.csproj", "bin|things|js")]
-        [TestCase("D:\\Users\\something.js", "D:")]
-        [TestCase("D:\\Users\\something", "something")]
+        [TestCase("D:\\Users\\something\\file.go", "Users")]
         public void ContainsIgnoredDirectoriesShouldReturnTrue(string filePath, string ignoredDirectories)
         {
             Assert.True(MainWindowBackend.ContainsIgnoredDirectories(filePath, ignoredDirectories));
