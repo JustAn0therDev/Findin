@@ -60,7 +60,7 @@ namespace Findin
             Search(SearchTextBox.Text);
         }
 
-        private static bool RegexPatternIsValid(string pattern)
+        public static bool RegexPatternIsValid(string pattern)
         {
             try
             {
@@ -73,11 +73,11 @@ namespace Findin
             }
         }
 
-        private static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
+        public static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
 
-        private static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.", "Warning");
+        public static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.", "Warning");
 
-        private static string CleanSemiColonString(string str) => new Regex(";{2,}|;$").Replace(str, "");
+        public static string CleanSemiColonString(string str) => new Regex("^;{1,}|;{2,}|;$").Replace(str, "");
 
         private void Search(string search)
         {
@@ -134,13 +134,10 @@ namespace Findin
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
-                SetResultsFoundLabelText(totalOccurrences);
+                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalOccurrences, ResultListView.Items.Count.ToString());
                 ResultsFoundLabel.Visible = true;
             }
         }
-
-        private void SetResultsFoundLabelText(int occurrences) 
-            => ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, occurrences, ResultListView.Items.Count.ToString());
 
         private (Dictionary<string, FileOccurrence>, int) GetFileContents(string path, string regexSearchPattern)
         {
@@ -161,7 +158,7 @@ namespace Findin
 
             foreach (string filePath in allFileNames)
             {
-                if (Regex.IsMatch(filePath, $"\\\\{ignoredDirectories}\\\\") || string.IsNullOrEmpty(filePath))
+                if (ContainsIgnoredDirectories(filePath, ignoredDirectories) || string.IsNullOrEmpty(filePath))
                     continue;
 
                 string fileContent = File.ReadAllText(filePath);
@@ -186,7 +183,10 @@ namespace Findin
             return (fileContents, totalOccurrences);
         }
 
-        private static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
+        public static bool ContainsIgnoredDirectories(string filePath, string ignoredDirectories)
+            => Regex.IsMatch(filePath, string.Concat("\\\\{0,}", ignoredDirectories, "\\\\{0,}"));
+
+        public static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
         {
             try
             {
