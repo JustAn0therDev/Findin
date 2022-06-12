@@ -42,7 +42,7 @@ After searching, the matches should be displayed:
 
 In the bottom left corner, you can see how many occurrences and lines the program found. **The number of lines shown is limited to 200, but all desired files are searched so you can know how many occurrences were found**.
 
- If the program takes a bit longer to find matches, you'll see a `Searching...` label in that same corner before the results, occurrences and lines are displayed.
+ If the program takes a bit longer to find all matches, you'll see a `Searching...` label in that same corner before the results, occurrences and lines are displayed.
 
 
 **This tool will always be open-source and free to use. The next milestone to release a Mac OS version.**
