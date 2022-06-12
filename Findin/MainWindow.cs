@@ -50,8 +50,7 @@ namespace Findin
                 return;
             }
 
-            if (string.IsNullOrEmpty(filePatterns) ||
-                filePatterns.Contains("*.*"))
+            if (string.IsNullOrEmpty(filePatterns) || filePatterns.Contains("*.*"))
                 return;
 
             if (!Directory.Exists(PathTextBox.Text))
@@ -184,7 +183,9 @@ namespace Findin
         }
 
         public static bool ContainsIgnoredDirectories(string filePath, string ignoredDirectories)
-            => Regex.IsMatch(filePath, string.Concat("\\\\{0,}", ignoredDirectories, "\\\\{0,}"));
+        {
+            return Regex.IsMatch(filePath, string.Concat("\\\\", ignoredDirectories, "\\\\"));
+        }
 
         public static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
         {
