@@ -15,7 +15,7 @@ namespace Findin
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
-        private const int MaxItemsInResultListView = 50;
+        private const int MaxItemsInResultListView = 200;
         private const int NumberOfBreakLineCharsToSkip = 2;
 
         private string DefaultProgramPath { get; set; }
@@ -88,7 +88,7 @@ namespace Findin
 
             try
             {
-                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = await GetFileContents(PathTextBox.Text, search);
+                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
 
                 foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
                 {
