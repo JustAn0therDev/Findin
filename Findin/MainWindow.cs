@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Findin
 {
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     public partial class MainWindowBackend : Form
     {
         public MainWindowBackend()
@@ -22,7 +20,7 @@ namespace Findin
 
         private string DefaultProgramPath { get; set; }
 
-        private void Search(object sender, EventArgs e)
+        private async void Search(object sender, EventArgs e)
         {
             if (!TextBoxHasValue(FilePatternsTextBox))
             {
@@ -56,7 +54,7 @@ namespace Findin
             if (!Directory.Exists(PathTextBox.Text))
                 return;
 
-            Search(SearchTextBox.Text);
+            await Search(SearchTextBox.Text);
         }
 
         public static bool RegexPatternIsValid(string pattern)
@@ -78,7 +76,7 @@ namespace Findin
 
         public static string CleanSemiColonString(string str) => new Regex("^;{1,}|;{2,}|;$").Replace(str, "");
 
-        private void Search(string search)
+        private async Task Search(string search)
         {
             ResultsFoundLabel.Visible = false;
             SearchingLabel.Visible = true;
@@ -90,7 +88,7 @@ namespace Findin
 
             try
             {
-                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = GetFileContents(PathTextBox.Text, search);
+                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = await GetFileContents(PathTextBox.Text, search);
 
                 foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
                 {
@@ -138,7 +136,7 @@ namespace Findin
             }
         }
 
-        private (Dictionary<string, FileOccurrence>, int) GetFileContents(string path, string regexSearchPattern)
+        private async Task<(Dictionary<string, FileOccurrence>, int)> GetFileContents(string path, string regexSearchPattern)
         {
             Dictionary<string, FileOccurrence> fileContents = new();
 
@@ -160,7 +158,7 @@ namespace Findin
                 if (ContainsIgnoredDirectories(filePath, ignoredDirectories) || string.IsNullOrEmpty(filePath))
                     continue;
 
-                string fileContent = File.ReadAllText(filePath);
+                string fileContent = await File.ReadAllTextAsync(filePath);
 
                 MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
 
@@ -184,7 +182,7 @@ namespace Findin
 
         public static bool ContainsIgnoredDirectories(string filePath, string ignoredDirectories)
         {
-            return Regex.IsMatch(filePath, string.Concat("\\\\", ignoredDirectories, "\\\\"));
+            return Regex.IsMatch(filePath, string.Concat(@"\\", ignoredDirectories, @"\\"));
         }
 
         public static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
