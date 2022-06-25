@@ -107,7 +107,10 @@ namespace Findin
                             break;
                         }
 
-                        if (!TryReadWholeLine(file.Value.FileContent, idx, out int lineNumber, out string lineContent))
+                        int lineNumber = default;
+                        string lineContent = string.Empty;
+
+                        if (!await Task.Run(() => TryReadWholeLine(file.Value.FileContent, idx, out lineNumber, out lineContent)))
                             break;
 
                         if (fileNameToLineNumber[file.Key].Contains(lineNumber))
