@@ -400,3 +400,5 @@ FodyWeavers.xsd
 
 # Custom files
 findin/config.txt
+state.bin
+Findin/state.bin
