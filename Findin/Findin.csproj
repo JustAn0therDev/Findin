@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>findin3.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,10 @@
 
   <ItemGroup>
     <Compile Remove="FileDictionaryUpdater.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="findin3.ico" />
   </ItemGroup>
 
 </Project>
