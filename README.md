@@ -1,6 +1,8 @@
 # Find In
 
-A search tool to find files by content.
+!['Find in's logo](Findin/findin.ico)
+
+Find in: A search tool to find files by content.
 
 I created this program because I use Visual Studio at my job and I do not like it's search; it is generally very slow and time consuming, especially on larger repositories. It gets worse as the projects grow bigger and legacy projects don't even seem to yield some results at all, even when searching for a file (not only for content inside them).
 
