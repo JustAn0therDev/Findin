@@ -15,7 +15,7 @@ namespace Findin
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
-        private const int MaxItemsInResultListView = 200;
+        private const int MaxItemsInResultListView = 1000;
         private const int NumberOfBreakLineCharsToSkip = 2;
 
         private string DefaultProgramPath { get; set; }
@@ -61,7 +61,7 @@ namespace Findin
         {
             try
             {
-                bool _ = Regex.IsMatch(RegexTestString, pattern);
+                _ = Regex.IsMatch(RegexTestString, pattern);
                 return true;
             }
             catch
@@ -103,7 +103,7 @@ namespace Findin
 
                     foreach (int idx in file.Value.MatchIndexes)
                     {
-                        if (ResultListView.Items.Count == MaxItemsInResultListView)
+                        if (listOfFileMatches.Count == MaxItemsInResultListView)
                         {
                             reachedLimit = true;
                             break;
@@ -255,9 +255,7 @@ namespace Findin
         private async void OnFormLoad(object sender, EventArgs e)
         {
             ResultListView.View = View.Details;
-
             ResultListView.FullRowSelect = true;
-
             ResultListView.GridLines = true;
 
             ResultListView.Columns.Add("File", 400, HorizontalAlignment.Left);
