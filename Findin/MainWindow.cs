@@ -15,7 +15,7 @@ namespace Findin
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
-        private const int MaxItemsInResultListView = 1000;
+        private const int MaxItemsInResultListView = 500;
         private const int NumberOfBreakLineCharsToSkip = 2;
 
         private string DefaultProgramPath { get; set; }
