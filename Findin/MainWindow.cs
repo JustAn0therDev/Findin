@@ -86,6 +86,8 @@ namespace Findin
 
             bool reachedLimit = false;
 
+            List<FileMatchInformation> listOfFileMatches = new();
+
             try
             {
                 (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
@@ -116,13 +118,7 @@ namespace Findin
                         if (fileNameToLineNumber[file.Key].Contains(lineNumber))
                             continue;
 
-                        ListViewItem item = new(file.Key);
-
-                        item.SubItems.Add(lineNumber.ToString());
-
-                        item.SubItems.Add(lineContent);
-
-                        ResultListView.Items.Add(item);
+                        listOfFileMatches.Add(new(file.Key, lineNumber, lineContent));
 
                         fileNameToLineNumber[file.Key].Add(lineNumber);
                     }
@@ -130,12 +126,28 @@ namespace Findin
             }
             finally
             {
+                UpdateResultListView(listOfFileMatches);
+
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
                 ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalOccurrences, ResultListView.Items.Count.ToString());
                 ResultsFoundLabel.Visible = true;
+            }
+        }
+
+        private void UpdateResultListView(List<FileMatchInformation> listLineNumberAndContent)
+        {
+            foreach (var file in listLineNumberAndContent)
+            {
+                ListViewItem item = new(file.FileName);
+
+                item.SubItems.Add(file.LineNumber.ToString());
+
+                item.SubItems.Add(file.LineContent);
+
+                ResultListView.Items.Add(item);
             }
         }
 
