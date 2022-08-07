@@ -13,7 +13,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
-        private const string CopiedLineFormat = "File: {0}, Line: {1}, Line Content: {2}";
+        private const string CopiedLineFormat = "File: {0}\nLine: {1}\nContent: {2}";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 500;
