@@ -262,6 +262,12 @@ namespace Findin
             ResultListView.Columns.Add("Line", 100, HorizontalAlignment.Left);
             ResultListView.Columns.Add("Match", 1200, HorizontalAlignment.Left);
 
+            ContextMenuStrip = new();
+
+            AddToolStripMenuItemToContextMenuStrip("Copy File Name", CopyFileNameToClipboard_Click);
+            AddToolStripMenuItemToContextMenuStrip("Copy Line Number", CopyLineNumberToClipboard_Click);
+            AddToolStripMenuItemToContextMenuStrip("Copy Line Content", CopyLineContentToClipboard_Click);
+
             if (!File.Exists(FormStateFileName))
                 return;
 
@@ -276,6 +282,33 @@ namespace Findin
             SearchTextBox.Text = formState.Search;
             DefaultProgramPath = formState.DefaultProgramPath;
             IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
+        }
+
+        private void AddToolStripMenuItemToContextMenuStrip(string text, EventHandler clickEvent)
+        {
+            ToolStripMenuItem menuItem = new(text);
+
+            menuItem.Click += clickEvent;
+
+            ContextMenuStrip.Items.Add(menuItem);
+        }
+
+        private void CopyFileNameToClipboard_Click(object? _, EventArgs e)
+        {
+            if (ResultListView.SelectedItems.Count > 0)
+                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[0]?.Text?.Split("\\")[^1] ?? string.Empty);
+        }
+
+        private void CopyLineNumberToClipboard_Click(object? _, EventArgs e)
+        {
+            if (ResultListView.SelectedItems.Count > 0)
+                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[1]?.Text ?? string.Empty);
+        }
+
+        private void CopyLineContentToClipboard_Click(object? _, EventArgs e)
+        {
+            if (ResultListView.SelectedItems.Count > 0)
+                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[2]?.Text ?? string.Empty);
         }
 
         private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
