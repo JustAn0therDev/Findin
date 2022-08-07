@@ -140,7 +140,7 @@ namespace Findin
 
         private void UpdateResultListView(List<FileMatchInformation> listLineNumberAndContent)
         {
-            foreach (var file in listLineNumberAndContent)
+            foreach (FileMatchInformation file in listLineNumberAndContent)
             {
                 ListViewItem item = new(file.FileName);
 
@@ -180,17 +180,17 @@ namespace Findin
 
                 totalOccurrences += matches.Count;
 
-                if (matches.Count > 0)
+                if (matches.Count == 0)
+                    continue;
+                
+                List<int> indexes = new();
+
+                foreach (Match match in matches)
                 {
-                    List<int> indexes = new();
-
-                    foreach (Match match in matches)
-                    {
-                        indexes.Add(match.Index);
-                    }
-
-                    fileContents.Add(filePath, new FileOccurrence(fileContent, indexes));
+                    indexes.Add(match.Index);
                 }
+
+                fileContents.Add(filePath, new FileOccurrence(fileContent, indexes));
             }
 
             return (fileContents, totalOccurrences);
@@ -268,7 +268,7 @@ namespace Findin
             AddToolStripMenuItemToContextMenuStrip("Copy File Name", CopyFileNameToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Line Number", CopyLineNumberToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Line Content", CopyLineContentToClipboard_Click);
-            AddToolStripMenuItemToContextMenuStrip("Copy Formatted Line", CopyFormattedContentToClipboard_Click);
+            AddToolStripMenuItemToContextMenuStrip("Copy Formatted", CopyFormattedContentToClipboard_Click);
 
             if (!File.Exists(FormStateFileName))
                 return;
