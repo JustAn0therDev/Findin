@@ -13,6 +13,7 @@ namespace Findin
 
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
+        private const string CopiedLineFormat = "File: {0}, Line: {1}, Line Content: {2}";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 500;
@@ -267,6 +268,7 @@ namespace Findin
             AddToolStripMenuItemToContextMenuStrip("Copy File Name", CopyFileNameToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Line Number", CopyLineNumberToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Line Content", CopyLineContentToClipboard_Click);
+            AddToolStripMenuItemToContextMenuStrip("Copy Formatted Line", CopyFormattedContentToClipboard_Click);
 
             if (!File.Exists(FormStateFileName))
                 return;
@@ -309,6 +311,23 @@ namespace Findin
         {
             if (ResultListView.SelectedItems.Count > 0)
                 Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[2]?.Text ?? string.Empty);
+        }
+
+        private void CopyFormattedContentToClipboard_Click(object? _, EventArgs e)
+        {
+            if (ResultListView.SelectedItems.Count > 0)
+            {
+                ListViewItem selectedItem = ResultListView.SelectedItems[0];
+
+                string formattedCopyContent = 
+                    string.Format(CopiedLineFormat, 
+                        selectedItem.SubItems[0]?.Text?.Split("\\")[^1], 
+                        selectedItem.SubItems[1].Text, 
+                        selectedItem.SubItems[2].Text
+                    );
+
+                Clipboard.SetText(formattedCopyContent);
+            }
         }
 
         private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
