@@ -14,6 +14,7 @@ namespace Findin
         private const string FormStateFileName = "state.bin";
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string CopiedLineFormat = "File: {0}\nLine: {1}\nContent: {2}";
+        private const string EmptyFieldAlertFormat = "The {0} field must have a value.";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 500;
@@ -71,11 +72,16 @@ namespace Findin
             }
         }
 
-        public static bool TextBoxHasValue(TextBox element) => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
+        public static bool TextBoxHasValue(TextBox element) 
+            => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
 
-        public static void ShowEmptyFieldAlert(TextBox textBox) => MessageBox.Show($"The {textBox.Name.Replace("TextBox", "")} field must have a value.", "Warning");
+        private static void ShowEmptyFieldAlert(TextBox? textBox) 
+            => MessageBox.Show(
+                string.Format(EmptyFieldAlertFormat, textBox?.Name?.Replace("TextBox", "")), 
+                "Warning");
 
-        public static string CleanSemiColonString(string str) => new Regex("^;{1,}|;{2,}|;$").Replace(str, "");
+        public static string CleanSemiColonString(string str) 
+            => new Regex("^;{1,}|;{2,}|;$").Replace(str, "");
 
         private async Task Search(string search)
         {
@@ -91,7 +97,8 @@ namespace Findin
 
             try
             {
-                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
+                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = 
+                    await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
 
                 foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
                 {
@@ -113,7 +120,11 @@ namespace Findin
                         int lineNumber = default;
                         string lineContent = string.Empty;
 
-                        if (!await Task.Run(() => TryReadWholeLine(file.Value.FileContent, idx, out lineNumber, out lineContent)))
+                        if (!await Task.Run(
+                                () => TryReadWholeLine(
+                                    file.Value.FileContent, idx, out lineNumber, out lineContent)
+                                )
+                            )
                             break;
 
                         if (fileNameToLineNumber[file.Key].Contains(lineNumber))
@@ -133,7 +144,10 @@ namespace Findin
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
-                ResultsFoundLabel.Text = string.Format(ResultsFoundFormat, totalOccurrences, ResultListView.Items.Count.ToString());
+                
+                ResultsFoundLabel.Text = 
+                    string.Format(ResultsFoundFormat, totalOccurrences, ResultListView.Items.Count.ToString());
+                
                 ResultsFoundLabel.Visible = true;
             }
         }
@@ -152,13 +166,14 @@ namespace Findin
             }
         }
 
-        private async Task<(Dictionary<string, FileOccurrence>, int)> GetFileContents(string path, string regexSearchPattern)
+        private async Task<(Dictionary<string, FileOccurrence>, int)> GetFileContents(string path, string regexPattern)
         {
             Dictionary<string, FileOccurrence> fileContents = new();
 
             string[] filePatterns = CleanSemiColonString(FilePatternsTextBox.Text).Split(';');
 
-            string ignoredDirectories = string.Join("|", CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';'));
+            string ignoredDirectories = 
+                string.Join("|", CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';'));
 
             List<string> allFileNames = new();
 
@@ -176,7 +191,7 @@ namespace Findin
 
                 string fileContent = await File.ReadAllTextAsync(filePath);
 
-                MatchCollection matches = Regex.Matches(fileContent, regexSearchPattern);
+                MatchCollection matches = Regex.Matches(fileContent, regexPattern);
 
                 totalOccurrences += matches.Count;
 
@@ -197,9 +212,7 @@ namespace Findin
         }
 
         public static bool ContainsIgnoredDirectories(string filePath, string ignoredDirectories)
-        {
-            return Regex.IsMatch(filePath, string.Concat(@"\\", ignoredDirectories, @"\\"));
-        }
+            => Regex.IsMatch(filePath, string.Concat(@"\\", ignoredDirectories, @"\\"));
 
         public static bool TryReadWholeLine(string input, int matchIndex, out int lineNumber, out string lineContent)
         {
@@ -298,7 +311,9 @@ namespace Findin
         private void CopyFileNameToClipboard_Click(object? _, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count > 0)
-                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[0]?.Text?.Split("\\")[^1] ?? string.Empty);
+                Clipboard.SetText(
+                    ResultListView.SelectedItems[0].SubItems[0]?.Text?.Split("\\")[^1] ?? string.Empty
+                    );
         }
 
         private void CopyLineNumberToClipboard_Click(object? _, EventArgs e)
@@ -315,19 +330,19 @@ namespace Findin
 
         private void CopyFormattedContentToClipboard_Click(object? _, EventArgs e)
         {
-            if (ResultListView.SelectedItems.Count > 0)
-            {
-                ListViewItem selectedItem = ResultListView.SelectedItems[0];
+            if (ResultListView.SelectedItems.Count == 0)
+                return;
+            
+            ListViewItem selectedItem = ResultListView.SelectedItems[0];
 
-                string formattedCopyContent = 
-                    string.Format(CopiedLineFormat, 
-                        selectedItem.SubItems[0]?.Text?.Split("\\")[^1], 
-                        selectedItem.SubItems[1].Text, 
-                        selectedItem.SubItems[2].Text
-                    );
+            string formattedCopyContent = 
+                string.Format(CopiedLineFormat, 
+                    selectedItem.SubItems[0]?.Text?.Split("\\")[^1], 
+                    selectedItem.SubItems[1].Text, 
+                    selectedItem.SubItems[2].Text
+                );
 
-                Clipboard.SetText(formattedCopyContent);
-            }
+            Clipboard.SetText(formattedCopyContent);
         }
 
         private void SearchTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -358,16 +373,6 @@ namespace Findin
             if (dialogResult == DialogResult.OK)
             {
                 PathTextBox.Text = PathFolderBrowser.SelectedPath;
-            }
-        }
-
-        private void SetDefaultProgramPathButton_Click(object sender, EventArgs e)
-        {
-            DialogResult dialogResult = DefaultProgramFileDialog.ShowDialog();
-
-            if (dialogResult == DialogResult.OK)
-            {
-                DefaultProgramPath = DefaultProgramFileDialog.FileName;
             }
         }
 
