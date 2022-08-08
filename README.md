@@ -46,6 +46,22 @@ In the bottom left corner, you can see how many occurrences and lines the progra
 
 If the program takes a bit longer to find all matches, you'll see a `Searching...` label in that same corner before the results, occurrences and lines are displayed.
 
+
+To copy content, you can right-click a line and you'll be greeted with the following context menu:
+
+![A screenshot of the program's context menu](DocsImages/ContextMenu.jpg)
+
+- *Copy File Name*: Copies just the file name, **not** the full path;
+- *Copy Line Number*: Copies the line number;
+- *Copy Line Content*: Copies the line content where the match was found; and
+- *Copy Formatted*: Copies the three items above formatted as follows:
+
+
+    File: Program.cs
+    Line: 6
+    Content: public static void Main(string[] args) {
+
+
 ## How does it actually work?
 
 If you want to know how it works in detail, you can do that by taking a look at the `MainWindow.cs` file.
