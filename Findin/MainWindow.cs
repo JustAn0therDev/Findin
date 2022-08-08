@@ -308,7 +308,7 @@ namespace Findin
             ContextMenuStrip.Items.Add(menuItem);
         }
 
-        private void CopyFileNameToClipboard_Click(object? _, EventArgs e)
+        private void CopyFileNameToClipboard_Click(object? sender, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count > 0)
                 Clipboard.SetText(
@@ -316,19 +316,19 @@ namespace Findin
                     );
         }
 
-        private void CopyLineNumberToClipboard_Click(object? _, EventArgs e)
+        private void CopyLineNumberToClipboard_Click(object? sender, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count > 0)
                 Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[1]?.Text ?? string.Empty);
         }
 
-        private void CopyLineContentToClipboard_Click(object? _, EventArgs e)
+        private void CopyLineContentToClipboard_Click(object? sender, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count > 0)
                 Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[2]?.Text ?? string.Empty);
         }
 
-        private void CopyFormattedContentToClipboard_Click(object? _, EventArgs e)
+        private void CopyFormattedContentToClipboard_Click(object? sender, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count == 0)
                 return;
