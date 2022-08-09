@@ -108,8 +108,6 @@ namespace Findin
                 (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) =
                     await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
 
-                Stopwatch.Stop();
-
                 foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
                 {
                     if (reachedLimit)
@@ -157,8 +155,10 @@ namespace Findin
             }
             finally
             {
-                UpdateResultsReturnedLabelWithStopwatchElapsedTime();
                 UpdateResultListView(listOfFileMatches);
+                
+                Stopwatch.Stop();
+                UpdateResultsReturnedLabelWithStopwatchElapsedTime();
 
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
