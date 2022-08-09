@@ -56,11 +56,11 @@ To copy content, you can right-click a line and you'll be greeted with the follo
 - *Copy Line Content*: Copies the line content where the match was found; and
 - *Copy Formatted*: Copies the three items above formatted as follows:
 
-
+```
     File: Program.cs
     Line: 6
     Content: public static void Main(string[] args) {
-
+```
 
 ## How does it actually work?
 
