@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Findin
 {
@@ -15,10 +16,14 @@ namespace Findin
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string CopiedLineFormat = "File: {0}\nLine: {1}\nContent: {2}";
         private const string EmptyFieldAlertFormat = "The {0} field must have a value.";
+        private const string ResultsTimeFormat = "Results returned in: {0}";
+        private const string ErrorMessageFormat = "An error occurred while processing your search. Error: {0}";
         private const string RegexTestString = "S";
         private const int MaxLineSize = 250;
         private const int MaxItemsInResultListView = 500;
         private const int NumberOfBreakLineCharsToSkip = 2;
+
+        private readonly Stopwatch Stopwatch = new();
 
         private string DefaultProgramPath { get; set; }
 
@@ -86,6 +91,7 @@ namespace Findin
         private async Task Search(string search)
         {
             ResultsFoundLabel.Visible = false;
+            ResultsReturnedLabel.Visible = false;
             SearchingLabel.Visible = true;
             ResultListView.Items.Clear();
 
@@ -97,8 +103,12 @@ namespace Findin
 
             try
             {
-                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) = 
+                Stopwatch.Start();
+
+                (Dictionary<string, FileOccurrence> fileSearchResults, totalOccurrences) =
                     await Task.Run(async () => await GetFileContents(PathTextBox.Text, search));
+
+                Stopwatch.Stop();
 
                 foreach (KeyValuePair<string, FileOccurrence> file in fileSearchResults)
                 {
@@ -123,8 +133,8 @@ namespace Findin
                         if (!await Task.Run(
                                 () => TryReadWholeLine(
                                     file.Value.FileContent, idx, out lineNumber, out lineContent)
-                                )
                             )
+                           )
                             break;
 
                         if (fileNameToLineNumber[file.Key].Contains(lineNumber))
@@ -136,33 +146,31 @@ namespace Findin
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    string.Format(
+                        ErrorMessageFormat, 
+                        ex.InnerException?.Message ?? ex.Message),
+                        "Error"
+                    );
+            }
             finally
             {
+                UpdateResultsReturnedLabelWithStopwatchElapsedTime();
                 UpdateResultListView(listOfFileMatches);
 
                 ResultListView.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
                 ResultListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.HeaderSize);
 
                 SearchingLabel.Visible = false;
-                
-                ResultsFoundLabel.Text = 
+
+                ResultsFoundLabel.Text =
                     string.Format(ResultsFoundFormat, totalOccurrences, ResultListView.Items.Count.ToString());
-                
+
                 ResultsFoundLabel.Visible = true;
-            }
-        }
-
-        private void UpdateResultListView(List<FileMatchInformation> listLineNumberAndContent)
-        {
-            foreach (FileMatchInformation file in listLineNumberAndContent)
-            {
-                ListViewItem item = new(file.FileName);
-
-                item.SubItems.Add(file.LineNumber.ToString());
-
-                item.SubItems.Add(file.LineContent);
-
-                ResultListView.Items.Add(item);
+                ResultsReturnedLabel.Visible = true;
+                Stopwatch.Reset();
             }
         }
 
@@ -261,6 +269,24 @@ namespace Findin
                 lineNumber = default;
                 lineContent = string.Empty;
                 return false;
+            }
+        }
+        
+        private void UpdateResultsReturnedLabelWithStopwatchElapsedTime()
+            => ResultsReturnedLabel.Text = 
+                string.Format(ResultsTimeFormat, Stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
+
+        private void UpdateResultListView(List<FileMatchInformation> listLineNumberAndContent)
+        {
+            foreach (FileMatchInformation file in listLineNumberAndContent)
+            {
+                ListViewItem item = new(file.FileName);
+
+                item.SubItems.Add(file.LineNumber.ToString());
+
+                item.SubItems.Add(file.LineContent);
+
+                ResultListView.Items.Add(item);
             }
         }
 
