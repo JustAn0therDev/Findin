@@ -44,6 +44,7 @@
             this.SearchingLabel = new System.Windows.Forms.Label();
             this.ResultsFoundLabel = new System.Windows.Forms.Label();
             this.ResultListView = new System.Windows.Forms.ListView();
+            this.ResultsReturnedLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // PathTextBox
@@ -162,11 +163,22 @@
             this.ResultListView.TabIndex = 11;
             this.ResultListView.UseCompatibleStateImageBehavior = false;
             // 
+            // ResultsReturnedLabel
+            // 
+            this.ResultsReturnedLabel.AutoSize = true;
+            this.ResultsReturnedLabel.Location = new System.Drawing.Point(1364, 632);
+            this.ResultsReturnedLabel.Name = "ResultsReturnedLabel";
+            this.ResultsReturnedLabel.Size = new System.Drawing.Size(153, 15);
+            this.ResultsReturnedLabel.TabIndex = 12;
+            this.ResultsReturnedLabel.Text = "Results returned in: 00:00:00";
+            this.ResultsReturnedLabel.Visible = false;
+            // 
             // MainWindowBackend
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1522, 655);
+            this.Controls.Add(this.ResultsReturnedLabel);
             this.Controls.Add(this.ResultListView);
             this.Controls.Add(this.ResultsFoundLabel);
             this.Controls.Add(this.SearchingLabel);
@@ -210,5 +222,6 @@
         private Label SearchingLabel;
         private Label ResultsFoundLabel;
         private ListView ResultListView;
+        private Label ResultsReturnedLabel;
     }
 }
