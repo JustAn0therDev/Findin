@@ -304,9 +304,7 @@ namespace Findin
 
             ContextMenuStrip = new();
 
-            AddToolStripMenuItemToContextMenuStrip("Copy File Name", CopyFileNameToClipboard_Click);
-            AddToolStripMenuItemToContextMenuStrip("Copy Line Number", CopyLineNumberToClipboard_Click);
-            AddToolStripMenuItemToContextMenuStrip("Copy Line Content", CopyLineContentToClipboard_Click);
+            AddToolStripMenuItemToContextMenuStrip("Copy File Path", CopyFilePathToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Formatted", CopyFormattedContentToClipboard_Click);
 
             if (!File.Exists(FormStateFileName))
@@ -334,24 +332,12 @@ namespace Findin
             ContextMenuStrip.Items.Add(menuItem);
         }
 
-        private void CopyFileNameToClipboard_Click(object? sender, EventArgs e)
+        private void CopyFilePathToClipboard_Click(object? sender, EventArgs e)
         {
             if (ResultListView.SelectedItems.Count > 0)
                 Clipboard.SetText(
-                    ResultListView.SelectedItems[0].SubItems[0]?.Text?.Split("\\")[^1] ?? string.Empty
+                    ResultListView.SelectedItems[0].SubItems[0]?.Text ?? string.Empty
                     );
-        }
-
-        private void CopyLineNumberToClipboard_Click(object? sender, EventArgs e)
-        {
-            if (ResultListView.SelectedItems.Count > 0)
-                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[1]?.Text ?? string.Empty);
-        }
-
-        private void CopyLineContentToClipboard_Click(object? sender, EventArgs e)
-        {
-            if (ResultListView.SelectedItems.Count > 0)
-                Clipboard.SetText(ResultListView.SelectedItems[0].SubItems[2]?.Text ?? string.Empty);
         }
 
         private void CopyFormattedContentToClipboard_Click(object? sender, EventArgs e)
@@ -361,10 +347,10 @@ namespace Findin
             
             ListViewItem selectedItem = ResultListView.SelectedItems[0];
 
-            string formattedCopyContent = 
-                string.Format(CopiedLineFormat, 
-                    selectedItem.SubItems[0]?.Text?.Split("\\")[^1], 
-                    selectedItem.SubItems[1].Text, 
+            string formattedCopyContent =
+                string.Format(CopiedLineFormat,
+                    selectedItem.SubItems[0]?.Text,
+                    selectedItem.SubItems[1].Text,
                     selectedItem.SubItems[2].Text
                 );
 
