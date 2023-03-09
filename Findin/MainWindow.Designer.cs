@@ -114,7 +114,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(223, 23);
             this.button1.TabIndex = 1;
-            this.button1.Text = "Select Folder";
+            this.button1.Text = "Select Directory";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.SelectFolderButton_Click);
             // 
@@ -157,9 +157,9 @@
             // 
             // ResultListView
             // 
-            this.ResultListView.Location = new System.Drawing.Point(12, 160);
+            this.ResultListView.Location = new System.Drawing.Point(12, 149);
             this.ResultListView.Name = "ResultListView";
-            this.ResultListView.Size = new System.Drawing.Size(1505, 469);
+            this.ResultListView.Size = new System.Drawing.Size(1505, 480);
             this.ResultListView.TabIndex = 11;
             this.ResultListView.UseCompatibleStateImageBehavior = false;
             // 

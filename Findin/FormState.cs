@@ -4,6 +4,5 @@
         string Path, 
         string FilePatterns, 
         string Search, 
-        string DefaultProgramPath,
         string IgnoredDirectories);
 }
