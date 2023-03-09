@@ -13,6 +13,7 @@ namespace Findin
         }
 
         private const string FormStateFileName = "state.bin";
+        private const string ConfigEditorFileName = "config_editor.txt";
         private const string ResultsFoundFormat = "Occurrences found: {0}. Showing {1} lines.";
         private const string CopiedLineFormat = "File: {0}\nLine: {1}\nContent: {2}";
         private const string EmptyFieldAlertFormat = "The {0} field must have a value.";
@@ -25,7 +26,10 @@ namespace Findin
 
         private readonly Stopwatch Stopwatch = new();
 
-        private string DefaultProgramPath { get; set; }
+        private string TextEditorProgramName { get; set; }
+        private string TextEditorPath { get; set; }
+        private string TextEditorCommandLineArgumentsFormat { get; set; }
+        private string TextEditorProgramNameWithExtension { get; set; }
 
         private async void Search(object sender, EventArgs e)
         {
@@ -77,15 +81,15 @@ namespace Findin
             }
         }
 
-        public static bool TextBoxHasValue(TextBox element) 
+        public static bool TextBoxHasValue(TextBox element)
             => !string.IsNullOrEmpty(element.Text) && !string.IsNullOrWhiteSpace(element.Text);
 
-        private static void ShowEmptyFieldAlert(TextBox? textBox) 
+        private static void ShowEmptyFieldAlert(TextBox? textBox)
             => MessageBox.Show(
-                string.Format(EmptyFieldAlertFormat, textBox?.Name?.Replace("TextBox", "")), 
+                string.Format(EmptyFieldAlertFormat, textBox?.Name?.Replace("TextBox", "")),
                 "Warning");
 
-        public static string CleanSemiColonString(string str) 
+        public static string CleanSemiColonString(string str)
             => new Regex("^;{1,}|;{2,}|;$").Replace(str, "");
 
         private async Task Search(string search)
@@ -148,7 +152,7 @@ namespace Findin
             {
                 MessageBox.Show(
                     string.Format(
-                        ErrorMessageFormat, 
+                        ErrorMessageFormat,
                         ex.InnerException?.Message ?? ex.Message),
                         "Error"
                     );
@@ -156,7 +160,7 @@ namespace Findin
             finally
             {
                 UpdateResultListView(listOfFileMatches);
-                
+
                 Stopwatch.Stop();
                 UpdateResultsReturnedLabelWithStopwatchElapsedTime();
 
@@ -180,7 +184,7 @@ namespace Findin
 
             string[] filePatterns = CleanSemiColonString(FilePatternsTextBox.Text).Split(';');
 
-            string ignoredDirectories = 
+            string ignoredDirectories =
                 string.Join("|", CleanSemiColonString(IgnoreDirectoriesTextBox.Text).Split(';'));
 
             List<string> allFileNames = new();
@@ -205,7 +209,7 @@ namespace Findin
 
                 if (matches.Count == 0)
                     continue;
-                
+
                 List<int> indexes = new();
 
                 foreach (Match match in matches)
@@ -271,9 +275,9 @@ namespace Findin
                 return false;
             }
         }
-        
+
         private void UpdateResultsReturnedLabelWithStopwatchElapsedTime()
-            => ResultsReturnedLabel.Text = 
+            => ResultsReturnedLabel.Text =
                 string.Format(ResultsTimeFormat, Stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
 
         private void UpdateResultListView(List<FileMatchInformation> listLineNumberAndContent)
@@ -304,23 +308,45 @@ namespace Findin
 
             ContextMenuStrip = new();
 
+            if (File.Exists(ConfigEditorFileName)) {
+                string[] configFileOptions;
+                string configFileContent = await File.ReadAllTextAsync(ConfigEditorFileName);
+
+                if (!string.IsNullOrWhiteSpace(configFileContent)) {
+                    // NOTE(Ruan): for now, only Windows has this type of line break.
+                    // It might change for other operating systems.
+                    configFileOptions = configFileContent.Split("\r\n");
+
+                    if (configFileOptions.Length >= 4) {
+                        TextEditorProgramName = configFileOptions[0].Replace("TextEditorProgramName=", "");
+                        TextEditorPath = configFileOptions[1].Replace("TextEditorPath=", "");
+                        TextEditorCommandLineArgumentsFormat = configFileOptions[2].Replace("CommandLineArguments=", "");
+                        TextEditorProgramNameWithExtension = configFileOptions[3].Replace("TextEditorProgramNameWithExtension=", "");
+                    }
+                }
+
+                AddToolStripMenuItemToContextMenuStrip($"Open in {TextEditorProgramName}", OpenInProgram_Click);
+            }
+
             AddToolStripMenuItemToContextMenuStrip("Copy File Path", CopyFilePathToClipboard_Click);
             AddToolStripMenuItemToContextMenuStrip("Copy Formatted", CopyFormattedContentToClipboard_Click);
 
-            if (!File.Exists(FormStateFileName))
+            if (!File.Exists(FormStateFileName)) {
                 return;
+            }
 
             await using Stream bytesFromStateFile = File.OpenRead(FormStateFileName);
             FormState? formState = JsonSerializer.Deserialize<FormState>(bytesFromStateFile);
 
-            if (formState == null)
+            if (formState == null) {
                 return;
+            }
 
             PathTextBox.Text = formState.Path;
             FilePatternsTextBox.Text = formState.FilePatterns;
             SearchTextBox.Text = formState.Search;
-            DefaultProgramPath = formState.DefaultProgramPath;
             IgnoreDirectoriesTextBox.Text = formState.IgnoredDirectories;
+
         }
 
         private void AddToolStripMenuItemToContextMenuStrip(string text, EventHandler clickEvent)
@@ -344,7 +370,7 @@ namespace Findin
         {
             if (ResultListView.SelectedItems.Count == 0)
                 return;
-            
+
             ListViewItem selectedItem = ResultListView.SelectedItems[0];
 
             string formattedCopyContent =
@@ -371,7 +397,6 @@ namespace Findin
                 PathTextBox.Text,
                 FilePatternsTextBox.Text,
                 SearchTextBox.Text,
-                DefaultProgramPath,
                 IgnoreDirectoriesTextBox.Text);
 
             string serializedFormState = JsonSerializer.Serialize(formState);
@@ -385,6 +410,31 @@ namespace Findin
             if (dialogResult == DialogResult.OK)
             {
                 PathTextBox.Text = PathFolderBrowser.SelectedPath;
+            }
+        }
+
+        private void OpenInProgram_Click(object? sender, EventArgs? e)
+        {
+            try
+            {
+                ListViewItem selectedItem = ResultListView.SelectedItems[0];
+
+                string filePath = selectedItem.SubItems[0].Text;
+                string lineNumber = selectedItem.SubItems[1].Text;
+
+                ProcessStartInfo processStartInfo = new(TextEditorProgramNameWithExtension)
+                {
+                    // This will always be true, because we depend on this to execute the program relative to the path indicated by the user.
+                    UseShellExecute = true,
+                    WorkingDirectory = TextEditorPath,
+                    Arguments = TextEditorCommandLineArgumentsFormat.Replace("[LN]", lineNumber).Replace("[FP]", filePath)
+                };
+
+                Process.Start(processStartInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while trying to open the configured program. Error: {ex.InnerException?.Message ?? ex.Message}", "Error");
             }
         }
 
